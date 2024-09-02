@@ -9,10 +9,13 @@ ki = -ik = j
 
 """
 
-q1 = [0, 1, 1, 1]
-q2 = [0, 1, 1, 1]
+import numpy as np
+import math
 
+q1 = [0, 0, 1, 0]
+q2 = [0, 0, 0, 1]
 
+#multiply  two quaternions, given as 4-item lists
 def multiplyQuaternion(q1, q2):
     [w1, x1, y1, z1] = [value for value in q1]
     [w2, x2, y2, z2] = [value for value in q2]
