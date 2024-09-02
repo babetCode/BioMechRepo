@@ -10,7 +10,7 @@ ki = -ik = j
 """
 
 import numpy as np
-import math
+from math import *
 
 q1 = [0, 0, 1, 0]
 q2 = [0, 0, 0, 1]
@@ -22,11 +22,30 @@ def multiplyQuaternion(q1, q2):
     scalar = w1*w2 - x1*x2 - y1*y2 - z1*z2
     i = w1*x2 + x1*w2 + y1*z2 - z1*y2
     j = w1*y2 + y1*w2 + z1*x2 - x1*z2
-    k = w1*z2 + z1*w1 + x1*y2 -y1*x2
+    k = w1*z2 + z1*w2 + x1*y2 -y1*x2
     return([scalar, i, j, k])
 
+#given point as 3-item list, angle in radians, axix as 3-item list
+def rotateQuaternion(point, angle, axis):
+    p = [0]
+    for value in point:
+        p.append(value)
+    print('p = ', p, '\n')
+    q = [cos(angle/2)]
+    q_inv = [cos(angle/2)]
+    for value in axis:
+        q.append(sin(angle/2)*value)
+        q_inv.append(-sin(angle/2)*value)
+    print('q = ', q, '\n')
+    print('q_inverse = ', q_inv, '\n')
+    rotation = multiplyQuaternion(multiplyQuaternion(q, p), q_inv)
+    print('rotation = ', rotation, '\n')
+    result = rotation[1:]
+    print('result = ', result, '\n')
+    return(result)
+
 def main():
-    print(multiplyQuaternion(q1, q2))
+    rotateQuaternion([1,0,0], pi, [0,sqrt(2)/2,sqrt(2)/2])
 
 #CALL MAIN
 if __name__ == '__main__':
