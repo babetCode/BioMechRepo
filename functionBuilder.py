@@ -29,9 +29,22 @@ def rotateQuaternion(point, angle, axis):
     roundedAngle = round(angle, 3)
     roundedAxis = [round(i, 3) for i in axis]
     roundedResult = [round(i, 3) for i in result]
-    print('the rotation of ', roundedPoint, ' by ', roundedAngle, ' radians around ', roundedAxis, ' is ', roundedResult, '\n')
+    #print('the rotation of ', roundedPoint, ' by ', roundedAngle, ' radians around ', roundedAxis, ' is ', roundedResult, '\n')
     return(result)
 
+#make class for IMUs
+default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
+default_position = np.array([0,0,0])
+class imu:
+    def __init__(self, name, initial_orient, initial_pos):
+        self.name = name
+        self.orientation = initial_orient
+        self.position = initial_pos
+    def __str__(self):
+        return f"{self.name}({self.orientation},{self.position})"
+    def rotate(self, angle, axis):
+        new_orientation = [rotateQuaternion(i, angle, axis) for i in self.orientation]
+        self.orientation = new_orientation
 def main():
     rotateQuaternion([23.000,0.000,0.000], pi, [0,sqrt(2)/2,sqrt(2)/2])
 
