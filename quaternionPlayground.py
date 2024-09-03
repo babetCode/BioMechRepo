@@ -30,7 +30,7 @@ def rotateQuaternion(point, angle, axis):
     p = [0]
     for value in point:
         p.append(value)
-    print('p = ', p, '\n')
+    print('point is ', p, '\n')
     q = [cos(angle/2)]
     q_inv = [cos(angle/2)]
     for value in axis:
@@ -45,7 +45,7 @@ def rotateQuaternion(point, angle, axis):
     return(result)
 
 def main():
-    rotateQuaternion([1,0,0], pi, [0,sqrt(2)/2,sqrt(2)/2])
+    print(multiplyQuaternion([0,1,0,0], [0,1,0,0]))
 
 #CALL MAIN
 if __name__ == '__main__':
