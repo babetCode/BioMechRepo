@@ -1,7 +1,3 @@
-"""
-A drafting space for functions used in IMU gait analysis
-
-""
 
 import numpy as np
 from math import *
