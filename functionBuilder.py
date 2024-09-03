@@ -36,7 +36,7 @@ def rotateQuaternion(point, angle, axis):
     return(result)
 
 def main():
-    rotateQuaternion([1.000,0.000,0.000], pi, [0,sqrt(2)/2,sqrt(2)/2])
+    rotateQuaternion([23.000,0.000,0.000], pi, [0,sqrt(2)/2,sqrt(2)/2])
 
 #CALL MAIN
 if __name__ == '__main__':
