@@ -1,3 +1,4 @@
+"this is a drafting space for function to be used in IMU gait analysis"
 
 import numpy as np
 from math import *
