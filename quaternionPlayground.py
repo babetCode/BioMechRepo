@@ -7,6 +7,11 @@ ij = -ji = k
 jk = -kj = i
 ki = -ik = j
 
+TO DO:
+- remove print checks form rotateQuaternion()
+- check for readability against chatGPT code
+-normalize axis in rotateQuaternion()
+
 """
 
 import numpy as np
@@ -30,7 +35,7 @@ def rotateQuaternion(point, angle, axis):
     p = [0]
     for value in point:
         p.append(value)
-    print('point is ', p, '\n')
+    print('p = ', p, '\n')
     q = [cos(angle/2)]
     q_inv = [cos(angle/2)]
     for value in axis:
@@ -45,7 +50,7 @@ def rotateQuaternion(point, angle, axis):
     return(result)
 
 def main():
-    print(multiplyQuaternion([0,1,0,0], [0,1,0,0]))
+    rotateQuaternion([1,0,0], pi, [0,sqrt(2)/2,sqrt(2)/2])
 
 #CALL MAIN
 if __name__ == '__main__':
