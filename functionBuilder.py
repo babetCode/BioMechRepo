@@ -29,24 +29,38 @@ def rotateQuaternion(point, angle, axis):
     roundedAngle = round(angle, 3)
     roundedAxis = [round(i, 3) for i in axis]
     roundedResult = [round(i, 3) for i in result]
-    #print('the rotation of ', roundedPoint, ' by ', roundedAngle, ' radians around ', roundedAxis, ' is ', roundedResult, '\n')
+    #print('the rotation of ', roundedPoint, ' by ', roundedAngle, \
+    # ' radians around ', roundedAxis, ' is ', roundedResult, '\n')
     return(result)
 
 #make class for IMUs
 default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
 default_position = np.array([0,0,0])
 class imu:
-    def __init__(self, name, initial_orient, initial_pos):
+    def __init__(self, name, initial_axes, initial_pos):
         self.name = name
-        self.orientation = initial_orient
+        self.local_axes = initial_axes
         self.position = initial_pos
+        self.display_axes = np.array(
+        [[round(xyz, 2) for xyz in axis] for axis in self.local_axes])
+        self.display_position = np.array([round(xyz, 2) for xyz in self.position])
     def __str__(self):
-        return f"{self.name}({self.orientation},{self.position})"
+        return f"{self.name} \
+        \norientation: x{self.display_axes[0]}, y{self.display_axes[1]}, z{self.display_axes[2]} \
+        \nposition: {self.position}"
+    def update_display(self):
+        self.display_axes = np.array(
+            [[round(xyz, 2) for xyz in axis] for axis in self.local_axes])
+        self.display_position = np.array([round(xyz, 2) for xyz in self.position])
     def rotate(self, angle, axis):
-        new_orientation = [rotateQuaternion(i, angle, axis) for i in self.orientation]
-        self.orientation = new_orientation
+        new_orientation = [rotateQuaternion(i, angle, axis) for i in self.local_axes]
+        self.local_axes = new_orientation
+        self.update_display()
 def main():
-    rotateQuaternion([23.000,0.000,0.000], pi, [0,sqrt(2)/2,sqrt(2)/2])
+    classtest = imu('tester', default_orientation, default_position)
+    print(classtest)
+    classtest.rotate(pi/2, [1,1,0])
+    print(classtest)
 
 #CALL MAIN
 if __name__ == '__main__':

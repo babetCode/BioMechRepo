@@ -4,4 +4,5 @@ import matplotlib.pyplot as plt
 
 default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
 
-print([i for i in default_orientation])
+print([[f"test({j})" for  j in i] for i in default_orientation])
+
