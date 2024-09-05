@@ -26,8 +26,13 @@ filepath = path + filename  # resulting file path
 
 c = c3d(filepath)  # load C3D file
 
+print('c: ', c)
+
 point_data = c["data"]["points"]
+
 analog_data = c["data"]["analogs"]
+
+print('analog data: ', analog_data)
 
 fs = 1000  # sampling frequency of analog data
 
