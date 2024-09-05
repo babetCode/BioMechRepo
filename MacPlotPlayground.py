@@ -57,6 +57,8 @@ for i in range(len(labels)):
 
 Fx_raw = analog_data[0, index, :]
 
+print('FX RAW: ', Fx_raw)
+
 plt.plot(Fx_raw)
 
 """ IMU placement:
@@ -100,6 +102,9 @@ indices = np.zeros(len(sensors) * 3)  # preallocate array containing indices
 # %%
 # of analog data corresponding to the sensors
 labels = c["parameters"]["ANALOG"]["LABELS"]["value"]  # labels of analog data
+
+print(labels[32])
+#print('INDEX: ', labels.index('DelsysTrignoBase 1: Sensor 1EMG'))
 
 # Get labels
 for i in range(len(sensors)):
@@ -174,5 +179,5 @@ plt.title("Sacral accelerations with AP force")
 
 plt.show(block=False)
 #plt.pause(0.001) # Pause for interval seconds.
-input("hit[enter] to end.")
+input("Press [enter] to close plots.")
 plt.close('all') # all open plots are correctly closed after each run
