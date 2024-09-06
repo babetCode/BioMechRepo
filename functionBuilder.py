@@ -43,7 +43,6 @@ def rotateQuaternion(point, angle, axis):
 def c3d_analogs_pd(participant, speed, trial, path):
     filename = (
         participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
-    path = mypath
     file_path = path+filename
     myc3d = c3d(file_path)
     point_data = myc3d['data']['points']
@@ -80,10 +79,8 @@ class imu:
 
 
 def main():
-    classtest = imu('tester', default_orientation, default_position)
-    print(classtest)
-    classtest.rotate(pi/2, [1,1,0])
-    print(classtest)
+    mypath = ("C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/")
+    print(c3d_analogs_pd('C07', 'Fast', '07', mypath))
 
 
 if __name__ == '__main__':
