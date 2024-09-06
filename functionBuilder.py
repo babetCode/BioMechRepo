@@ -18,9 +18,7 @@ def multiplyQuaternion(q1, q2):
     return([scalar, i, j, k])
 
 
-# Rotates a point (3 item list)
-# By and angle (radians)
-# Around an axis through the origin (3 item list)
+# Rotates point (3 item list) by angle (radians) around axis through origin (3 item list)
 def rotateQuaternion(point, angle, axis):
     normalizedAxis = axis/np.linalg.norm(axis)
     q_inv = [cos(angle/2)]
