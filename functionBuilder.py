@@ -1,7 +1,11 @@
-"this is a drafting space for function to be used in IMU gait analysis"
+"this is a drafting space for functions to be used in IMU gait analysis"
 
 import numpy as np
 from math import *
+from ezc3d import c3d
+import matplotlib.pyplot as plt
+import pandas as pd
+
 
 #multiply  two quaternions, given as 4-item lists
 def multiplyQuaternion(q1, q2):
@@ -13,7 +17,10 @@ def multiplyQuaternion(q1, q2):
     k = w1*z2 + z1*w2 + x1*y2 -y1*x2
     return([scalar, i, j, k])
 
-#given point as 3-item list, angle in radians, axix as 3-item list
+
+# Rotates a point (3 item list)
+# By and angle (radians)
+# Around an axis through the origin (3 item list)
 def rotateQuaternion(point, angle, axis):
     normalizedAxis = axis/np.linalg.norm(axis)
     q_inv = [cos(angle/2)]
@@ -29,11 +36,25 @@ def rotateQuaternion(point, angle, axis):
     roundedAngle = round(angle, 3)
     roundedAxis = [round(i, 3) for i in axis]
     roundedResult = [round(i, 3) for i in result]
-    #print('the rotation of ', roundedPoint, ' by ', roundedAngle, \
-    # ' radians around ', roundedAxis, ' is ', roundedResult, '\n')
     return(result)
 
-#make class for IMUs
+
+# Returns dataframe with 109 labeled indices
+def c3d_analogs_pd(participant, speed, trial, path):
+    filename = (
+        participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
+    path = mypath
+    file_path = path+filename
+    myc3d = c3d(file_path)
+    point_data = myc3d['data']['points']
+    analog_data = myc3d['data']['analogs']
+    analogs = analog_data[0, :, :]
+    analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
+    df = pd.DataFrame(data=analogs, index=analog_labels)
+    return df
+
+
+# Class object for IMUs
 default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
 default_position = np.array([0,0,0])
 class imu:
@@ -56,12 +77,14 @@ class imu:
         new_orientation = [rotateQuaternion(i, angle, axis) for i in self.local_axes]
         self.local_axes = new_orientation
         self.update_display()
+
+
 def main():
     classtest = imu('tester', default_orientation, default_position)
     print(classtest)
     classtest.rotate(pi/2, [1,1,0])
     print(classtest)
 
-#CALL MAIN
+
 if __name__ == '__main__':
     main()

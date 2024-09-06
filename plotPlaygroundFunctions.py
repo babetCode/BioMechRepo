@@ -19,7 +19,6 @@ def list_participants():
         participants.remove(participant)
     return participants
 
-trial1 = '07'
 
 def c3d_analogs_pd(participant, speed, trial, path):
     filename = (
@@ -33,6 +32,7 @@ def c3d_analogs_pd(participant, speed, trial, path):
     analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
     df = pd.DataFrame(data=analogs, index=analog_labels)
     return df
+
 
 def main():
     participants = [
