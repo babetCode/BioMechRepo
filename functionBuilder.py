@@ -95,11 +95,13 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
 
 
 def main():
-    mypath = ("C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/")
+    if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\ABabet_490R-1\\functionBuilder.py':
+        mypath = ("C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/")
     df = c3d_analogs_pd('C07', 'Fast', '07', mypath)
     data = get_sensor_data('LDistalShank', 'GYR', 'P', df)
     plt.plot(data)
     plt.show()
+
 
 if __name__ == '__main__':
     main()
