@@ -37,20 +37,6 @@ def rotateQuaternion(point, angle, axis):
     return(result)
 
 
-# Returns dataframe with 109 labeled indices
-def c3d_analogs_pd(participant, speed, trial, path):
-    filename = (
-        participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
-    file_path = path+filename
-    myc3d = c3d(file_path)
-    point_data = myc3d['data']['points']
-    analog_data = myc3d['data']['analogs']
-    analogs = analog_data[0, :, :]
-    analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
-    df = pd.DataFrame(data=analogs, index=analog_labels)
-    return df
-
-
 # Class object for IMUs
 default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
 default_position = np.array([0,0,0])
@@ -76,10 +62,44 @@ class imu:
         self.update_display()
 
 
+# Returns dataframe with 109 labeled indices
+def c3d_analogs_pd(participant, speed, trial, path):
+    filename = (
+        participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
+    file_path = path+filename
+    myc3d = c3d(file_path)
+    point_data = myc3d['data']['points']
+    analog_data = myc3d['data']['analogs']
+    analogs = analog_data[0, :, :]
+    analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
+    df = pd.DataFrame(data=analogs, index=analog_labels)
+    return df
+
+
+def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
+    axis_dict = {'P': 'Pitch', 'Y': 'Yaw', 'R': 'Roll'}
+    if type(sensor_placement) == str:
+        OneToEleven = [i+1 for i in range(11)]
+        IMU_placements = []
+        for side in ['L', 'R']:
+            for part in ['Thigh', 'Shank']:
+                for place in ['Proximal', 'Distal']:
+                    IMU_placements.append(side+place+part)
+            IMU_placements.append(side+'Foot')
+        IMU_placements.append('Sacrum')
+        IMU_dict = dict(zip(IMU_placements, OneToEleven))
+        index = 'DelsysTrignoBase 1: Sensor '+str(IMU_dict[sensor_placement])+'IM '+ACCorGYR+' '+axis_dict[PitRolYaw]
+    elif type(sensor_placement) == int:
+        index = 'DelsysTrignoBase 1: Sensor '+str(sensor_placement)+'IM '+ACCorGYR+' '+axis_dict[PitRolYaw]
+    return df.loc[index]
+
+
 def main():
     mypath = ("C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/")
-    print(c3d_analogs_pd('C07', 'Fast', '07', mypath))
-
+    df = c3d_analogs_pd('C07', 'Fast', '07', mypath)
+    data = get_sensor_data('LDistalShank', 'GYR', 'P', df)
+    plt.plot(data)
+    plt.show()
 
 if __name__ == '__main__':
     main()
