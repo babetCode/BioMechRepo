@@ -6,35 +6,27 @@ from scipy.fft import fft
 import numpy as np
 import pandas as pd
 
-print('program starting')
+
 # Give participant, speed, trial, and leg (left: 'L' or right: 'R')
 p = "C07"  # participant
 speed = "Fast"  # walking speed
 trial = "07"
 leg = "L"
-
 fp = 4  # force plate from which to get force data
 
-# Get file path
-filename = (
-    p + "_C3D/" + p + "_" + speed + "_" + trial + ".c3d"
-)  # name of file corresponding to the trial to be analyzed
-path = (
-    "C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/"
-)
+# Get name of file path corresponding to the trial to be analyzed
+filename = (p + "_C3D/" + p + "_" + speed + "_" + trial + ".c3d") 
+path = ("C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/")
 filepath = path + filename  # resulting file path
-
 c = c3d(filepath)  # load C3D file
 
-print('c: ', c)
-
-point_data = c["data"]["points"]
-
-analog_data = c["data"]["analogs"]
-
-print('analog data: ', analog_data)
-
+#load point and analog data
+point_data = c["data"]["points"] # UNKNOWN???
+analog_data = c["data"]["analogs"] # 3 dimensional numpy array
 fs = 1000  # sampling frequency of analog data
+
+#Print Test
+print('point data: ', point_data, 'END POINT DATA')
 
 # %% Clean space
 plt.close("all")
@@ -171,6 +163,13 @@ plt.plot(sacrum_a, label="resultant")
 plt.legend()
 # add title
 plt.title("Sacral accelerations with AP force")
+
+def main():
+    
+
+
+if __name__ == "__main__":
+    main()
 
 plt.show(block=False)
 #plt.pause(0.001) # Pause for interval seconds.

@@ -67,6 +67,9 @@ plt.close("all")
 
 # %% Get force data
 
+
+##### ln. 75-84 == labels.index('F4Y')
+
 # Get force plate channel
 """ Force plate analog channels:
     X: lateral-medial, Y: posterior-anterior, Z: downward vertical
@@ -82,6 +85,8 @@ for i in range(len(labels)):
     ):  # find label for specified force plate Y-direction (posterior-anterior)
         index = i  # set index to that of specified force plate
         break
+
+##### ln. 75-84 == labels.index('F4Y')
 
 Fx_raw = analog_data[0, index, :]
 
