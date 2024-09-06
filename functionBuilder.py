@@ -96,7 +96,9 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
 
 def main():
     if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\ABabet_490R-1\\functionBuilder.py':
-        mypath = ("C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/")
+        mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
+    elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/functionBuilder.py':
+        mypath = '/Users/adrienbabet/Documents/490R/Walking C3D files/'
     df = c3d_analogs_pd('C07', 'Fast', '07', mypath)
     data = get_sensor_data('LDistalShank', 'GYR', 'P', df)
     plt.plot(data)
