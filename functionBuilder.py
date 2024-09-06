@@ -63,7 +63,7 @@ class imu:
 
 
 # Returns dataframe with 109 labeled indices
-def c3d_analogs_pd(participant, speed, trial, path):
+def c3d_analogs_df(participant, speed, trial, path):
     filename = (
         participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
     file_path = path+filename
@@ -104,7 +104,7 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
 
 def main():
     mypath = adrienC3Dpath()
-    df = c3d_analogs_pd('C07', 'Fast', '07', mypath)
+    df = c3d_analogs_df('C07', 'Fast', '07', mypath)
     data = get_sensor_data('LDistalShank', 'GYR', 'P', df)
     plt.plot(data)
     plt.show()
