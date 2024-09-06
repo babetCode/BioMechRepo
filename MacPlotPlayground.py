@@ -27,12 +27,11 @@ filepath = path + filename  # resulting file path
 c = c3d(filepath)  # load C3D file
 
 print('c: ', c)
+print('0 row: ', c['data']['analogs'][0][0])
 
 point_data = c["data"]["points"]
 
 analog_data = c["data"]["analogs"]
-
-print('analog data: ', analog_data)
 
 fs = 1000  # sampling frequency of analog data
 
@@ -104,7 +103,6 @@ indices = np.zeros(len(sensors) * 3)  # preallocate array containing indices
 labels = c["parameters"]["ANALOG"]["LABELS"]["value"]  # labels of analog data
 
 print(labels[32])
-#print('INDEX: ', labels.index('DelsysTrignoBase 1: Sensor 1EMG'))
 
 # Get labels
 for i in range(len(sensors)):
