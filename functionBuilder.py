@@ -105,8 +105,8 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
 def main():
     mypath = adrienC3Dpath()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
-    data = get_sensor_data('LDistalShank', 'GYR', 'P', df)
-    plt.plot(data)
+    LDS = np.array([[get_sensor_data('LDistalShank', A_G, i, df) for i in ['P', 'Y', 'R']] for A_G in ['ACC', 'GYR']])
+    plt.plot(LDS)
     plt.show()
 
 

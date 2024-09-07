@@ -49,6 +49,31 @@ def rotateQuaternion(point, angle, axis):
     print('result = ', result, '\n')
     return(result)
 
+
+default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
+default_position = np.array([0,0,0])
+class imu:
+    def __init__(self, name, initial_axes, initial_pos):
+        self.name = name
+        self.local_axes = initial_axes
+        self.position = initial_pos
+        self.display_axes = np.array(
+        [[round(xyz, 2) for xyz in axis] for axis in self.local_axes])
+        self.display_position = np.array([round(xyz, 2) for xyz in self.position])
+    def __str__(self):
+        return f"{self.name} \
+        \norientation: x{self.display_axes[0]}, y{self.display_axes[1]}, z{self.display_axes[2]} \
+        \nposition: {self.position}"
+    def update_display(self):
+        self.display_axes = np.array(
+            [[round(xyz, 2) for xyz in axis] for axis in self.local_axes])
+        self.display_position = np.array([round(xyz, 2) for xyz in self.position])
+    def rotate(self, angle, axis):
+        new_orientation = [rotateQuaternion(i, angle, axis) for i in self.local_axes]
+        self.local_axes = new_orientation
+        self.update_display()
+
+        
 def main():
     rotateQuaternion([1,0,0], pi, [0,sqrt(2)/2,sqrt(2)/2])
 
