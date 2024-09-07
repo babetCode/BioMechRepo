@@ -38,28 +38,20 @@ def rotateQuaternion(point, angle, axis):
 
 
 # Class object for IMUs
-default_orientation = np.array([[1,0,0], [0,1,0], [0,0,1]])
-default_position = np.array([0,0,0])
 class imu:
-    def __init__(self, name, initial_axes, initial_pos):
-        self.name = name
-        self.local_axes = initial_axes
-        self.position = initial_pos
-        self.display_axes = np.array(
-        [[round(xyz, 2) for xyz in axis] for axis in self.local_axes])
-        self.display_position = np.array([round(xyz, 2) for xyz in self.position])
-    def __str__(self):
-        return f"{self.name} \
-        \norientation: x{self.display_axes[0]}, y{self.display_axes[1]}, z{self.display_axes[2]} \
-        \nposition: {self.position}"
-    def update_display(self):
-        self.display_axes = np.array(
-            [[round(xyz, 2) for xyz in axis] for axis in self.local_axes])
-        self.display_position = np.array([round(xyz, 2) for xyz in self.position])
-    def rotate(self, angle, axis):
-        new_orientation = [rotateQuaternion(i, angle, axis) for i in self.local_axes]
-        self.local_axes = new_orientation
-        self.update_display()
+    def __init__(self, df, sensor_num):
+        self.indices = [row for row in df.index] # list of analog labels
+        self.start_row_index = self.indices.index('DelsysTrignoBase 1: Sensor '+str(sensor_num)+'IM ACC Pitch') # find first row label
+        self.all_data = df.iloc[self.start_row_index : self.start_row_index+6] # get dataframe of the 6 rows
+        self.acc_data = self.all_data.iloc[0:3] # get the first 3 rows of acc data
+        self.sqrt_acc = np.square(self.acc_data) # square of all acc data
+        self.net_acc_sq = self.sqrt_acc.apply(np.sum, axis=0, raw=True) # sum of P,R,Y acc squares for each frame
+        self.net_acc = np.sqrt(self.net_acc_sq) # net acc for each frame
+        self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
+    
+    def plot_total_acc():
+        pass
+
 
 
 # Returns dataframe with 109 labeled indices
@@ -105,9 +97,10 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
 def main():
     mypath = adrienC3Dpath()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
-    LDS = np.array([[get_sensor_data('LDistalShank', A_G, i, df) for i in ['P', 'Y', 'R']] for A_G in ['ACC', 'GYR']])
-    plt.plot(LDS)
-    plt.show()
+    # LDS = np.array([[get_sensor_data('LDistalShank', A_G, i, df) for i in ['P', 'Y', 'R']] for A_G in ['ACC', 'GYR']])
+    # plt.plot(LDS)
+    # plt.show()
+    tester = imu(df, 2)
 
 
 if __name__ == '__main__':

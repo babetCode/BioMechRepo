@@ -24,12 +24,12 @@ def c3d_analogs_pd(participant, speed, trial, path):
 
 
 def main():
-    participants = [
-        'A01', 'A02', 'A03', 'A04', 'A05', 'A06',
-        'C03', 'C04', 'C05', 'C06', 'C07', 'C08',
-        'C010', 'C011', 'C012', 'C015', 'C017']
-    speeds = ['Fast', 'Slow', 'SSWS', 'Static', 'PWS']
-    print(c3d_analogs_pd('C07', 'Fast', '07', mypath))
+    arr = np.array([[(i+1)*(j+2) for i in range(5)] for j in range(3)])
+    rows = ['these', 'are', 'names']
+    df = pd.DataFrame(data= arr, index= rows)
+    print(df)
+    print(df.apply(np.sqrt, axis=1, raw=False))
+    
 
 if __name__ == "__main__":
     main()
