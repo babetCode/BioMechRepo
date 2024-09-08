@@ -39,18 +39,40 @@ def rotateQuaternion(point, angle, axis):
 
 # Class object for IMUs
 class imu:
-    def __init__(self, df, sensor_num):
+    def __init__(self, name, df, sensor_num):
+        self.name = name
         self.indices = [row for row in df.index] # list of analog labels
         self.start_row_index = self.indices.index('DelsysTrignoBase 1: Sensor '+str(sensor_num)+'IM ACC Pitch') # find first row label
         self.all_data = df.iloc[self.start_row_index : self.start_row_index+6] # get dataframe of the 6 rows
+        
         self.acc_data = self.all_data.iloc[0:3] # get the first 3 rows of acc data
         self.sqrt_acc = np.square(self.acc_data) # square of all acc data
         self.net_acc_sq = self.sqrt_acc.apply(np.sum, axis=0, raw=True) # sum of P,R,Y acc squares for each frame
         self.net_acc = np.sqrt(self.net_acc_sq) # net acc for each frame
+
         self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
+
+        frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
+        xyz_axes = np.array([[[1,0,0] for i in range(frames)],
+        [[0,1,0] for i in range(frames)], [[0,0,1] for i in range(frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
+        print(xyz_axes.shape)
+        print(xyz_axes[:,0,:])
+        for i in range(1, frames):
+            xyz_axes[:,i,:] = xyz_axes[:,i,:]+xyz_axes[:,i-1,:]
+        print(xyz_axes[0,50,:])
+
+    def plot_net_acc(self, scale):
+        plt.plot(self.net_acc*scale, label = 'net acc '+self.name)
     
-    def plot_total_acc(self):
-        plt.plot(self.net_acc)
+    def plot_PRY(self, PRY, scale):
+        if 'P' in PRY:
+            plt.plot(self.gyr_data.iloc[0]*scale, label= 'gyr pitch '+self.name)
+        if 'R' in PRY:
+            plt.plot(self.gyr_data.iloc[1]*scale, label= 'gyr roll '+self.name)
+        if 'Y' in PRY:
+            plt.plot(self.gyr_data.iloc[2]*scale, label= 'gyr yaw '+self.name)
+
+
 
 
 
@@ -97,14 +119,15 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
 def main():
     mypath = adrienC3Dpath()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
-    # LDS = np.array([[get_sensor_data('LDistalShank', A_G, i, df) for i in ['P', 'Y', 'R']] for A_G in ['ACC', 'GYR']])
-    # plt.plot(LDS)
-    # plt.show()
-    LDistalShank = imu(df, 2)
-    plt.plot(LDistalShank.net_acc)
-    plt.show()
+    plt.close('all')
+    LDistalShank = imu('LDistShank', df, 2)
 
-    stoptest = input('hit [enter] to close plots')
+    # plt.figure()
+    # LDistalShank.plot_net_acc(150)
+    # LDistalShank.plot_PRY('PRY', 1)
+    # plt.legend()
+    # plt.show(block=False)
+    # close_plots = input('[enter] to close plots >')
 
 if __name__ == '__main__':
     main()

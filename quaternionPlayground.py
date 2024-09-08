@@ -73,9 +73,10 @@ class imu:
         self.local_axes = new_orientation
         self.update_display()
 
+
         
 def main():
-    rotateQuaternion([1,0,0], pi, [0,sqrt(2)/2,sqrt(2)/2])
+    mydict = {}
 
 #CALL MAIN
 if __name__ == '__main__':
