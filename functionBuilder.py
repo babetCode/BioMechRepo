@@ -55,11 +55,11 @@ class imu:
         frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
         xyz_axes = np.array([[[1,0,0] for i in range(frames)],
         [[0,1,0] for i in range(frames)], [[0,0,1] for i in range(frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
-        print(xyz_axes.shape)
-        print(xyz_axes[:,0,:])
-        for i in range(1, frames):
-            xyz_axes[:,i,:] = xyz_axes[:,i,:]+xyz_axes[:,i-1,:]
-        print(xyz_axes[0,50,:])
+        # print(xyz_axes.shape)
+        # print(xyz_axes[:,0,:])
+        # for i in range(1, frames):
+        #     xyz_axes[:,i,:] = xyz_axes[:,i,:]+xyz_axes[:,i-1,:]
+        # print(xyz_axes[0,50,:])
 
     def plot_net_acc(self, scale):
         plt.plot(self.net_acc*scale, label = 'net acc '+self.name)
@@ -115,12 +115,36 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
         index = 'DelsysTrignoBase 1: Sensor '+str(sensor_placement)+'IM '+ACCorGYR+' '+axis_dict[PitRolYaw]
     return df.loc[index]
 
+def test_axis_rotation():
+    xaxis = [1.,0.,0.]
+    yaxis = [0.,1.,0.]
+    zaxis = [0.,0.,1.]
+    xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(5)])
+    for i in range (1, xyz_axes.shape[0]):
+        print('last axis:\n', xyz_axes[i-1], xyz_axes[i].shape)
+        rotated_axes = np.array([rotateQuaternion(j, pi/6, zaxis) for j in xyz_axes[i-1,:,:]])
+        print('rotated axis:\n', rotated_axes, rotated_axes.shape)
+        xyz_axes[i] = rotated_axes
+        print('new xyz:\n', xyz_axes[i])
+        # for j in xyz_axes[i]:
+        #     print(j.shape)
+        # print(xyz_axes[i,:,:])
+        # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
+
+
 
 def main():
     mypath = adrienC3Dpath()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
     plt.close('all')
     LDistalShank = imu('LDistShank', df, 2)
+
+    test_axis_rotation()
+    # axes = np.array([[1,0,0],[0,1,0],[0,0,1]])
+    # print(np.array([rotateQuaternion(i, pi/6, axes[2]) for i in axes]))
+    # for i in range(3):
+    #     print(axes[i])
+    #     print(rotateQuaternion(axes[i], pi/6, axes[2]))
 
     # plt.figure()
     # LDistalShank.plot_net_acc(150)
