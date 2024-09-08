@@ -49,8 +49,8 @@ class imu:
         self.net_acc = np.sqrt(self.net_acc_sq) # net acc for each frame
         self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
     
-    def plot_total_acc():
-        pass
+    def plot_total_acc(self):
+        plt.plot(self.net_acc)
 
 
 
@@ -100,8 +100,11 @@ def main():
     # LDS = np.array([[get_sensor_data('LDistalShank', A_G, i, df) for i in ['P', 'Y', 'R']] for A_G in ['ACC', 'GYR']])
     # plt.plot(LDS)
     # plt.show()
-    tester = imu(df, 2)
+    LDistalShank = imu(df, 2)
+    plt.plot(LDistalShank.net_acc)
+    plt.show()
 
+    stoptest = input('hit [enter] to close plots')
 
 if __name__ == '__main__':
     main()
