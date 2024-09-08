@@ -131,7 +131,7 @@ def test_axis_rotation():
         # print(xyz_axes[i,:,:])
         # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
 
-def plot_rotation(point, angle, axis):
+def plot_rotation(point, angle, axis, ax, name):
     t = np.linspace(0.0, angle, 100)
     x = np.zeros(100)
     y = np.zeros(100)
@@ -141,15 +141,13 @@ def plot_rotation(point, angle, axis):
         x[i] = p[0]
         y[i] = p[1]
         z[i] = p[2]
+    ax.plot(x, y, z, label=name)
+    return(rotateQuaternion(point, angle, axis))
 
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    ax.plot(x, y, z, label='parametric curve')
-    ax.legend()
-
-
+def plot3axes(ax):
+    ax.plot((-1.3,1.3), (0,0), (0,0), label='x')
+    ax.plot((0,0), (-1.3,1.3), (0,0), label='y')
+    ax.plot((0,0), (0,0), (-1.3,1.3), label='z')
 
 
 def main():
