@@ -131,6 +131,25 @@ def test_axis_rotation():
         # print(xyz_axes[i,:,:])
         # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
 
+def plot_rotation(point, angle, axis):
+    t = np.linspace(0.0, angle, 100)
+    x = np.zeros(100)
+    y = np.zeros(100)
+    z = np.zeros(100)
+    for i in range(100):
+        p = rotateQuaternion(point, t[i], axis)
+        x[i] = p[0]
+        y[i] = p[1]
+        z[i] = p[2]
+
+    ax = plt.figure().add_subplot(projection='3d')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.plot(x, y, z, label='parametric curve')
+    ax.legend()
+
+
 
 
 def main():
@@ -139,19 +158,22 @@ def main():
     plt.close('all')
     LDistalShank = imu('LDistShank', df, 2)
 
-    test_axis_rotation()
-    # axes = np.array([[1,0,0],[0,1,0],[0,0,1]])
-    # print(np.array([rotateQuaternion(i, pi/6, axes[2]) for i in axes]))
-    # for i in range(3):
-    #     print(axes[i])
-    #     print(rotateQuaternion(axes[i], pi/6, axes[2]))
+    print(np.zeros(10))
 
+    # test_axis_rotation()
+    x1 = [1.,0.,0.]
+    plot_rotation(x1, pi/2, [0,1,0]) # rotate x=1 around y-axis
+    # print(p2) 
+    # p3 = rotateQuaternion(p2, pi/2, [1,0,0])
+    # print(p3)
+    # qp = rotateQuaternion(x1, sqrt(2*(pi/2)*(pi/2)), [sqrt(2)/2,sqrt(2)/2,0])
+    # print(qp)
     # plt.figure()
     # LDistalShank.plot_net_acc(150)
     # LDistalShank.plot_PRY('PRY', 1)
     # plt.legend()
-    # plt.show(block=False)
-    # close_plots = input('[enter] to close plots >')
+    plt.show(block=False)
+    close_plots = input('[enter] to close plots >')
 
 if __name__ == '__main__':
     main()

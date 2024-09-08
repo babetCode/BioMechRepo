@@ -1,15 +1,4 @@
-from math import *
-from ezc3d import c3d
-import matplotlib.pyplot as plt
-import scipy.signal as sgl
-from scipy.fft import fft
-import numpy as np
-import pandas as pd
-import mpl_toolkits.mplot3d.axes3d as p3
-import matplotlib.animation as animation
-
 from functionBuilder import *
-
 
 def main():
     mypath = adrienC3Dpath()
@@ -36,5 +25,5 @@ def main():
     plt.show(block=False)
     close_plots = input('[enter] to close plots >')
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
