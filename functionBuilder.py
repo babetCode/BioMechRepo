@@ -61,6 +61,28 @@ class imu:
         #     xyz_axes[:,i,:] = xyz_axes[:,i,:]+xyz_axes[:,i-1,:]
         # print(xyz_axes[0,50,:])
 
+    def raw_orientation(self):
+        xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(100)])
+        [xaxis, yaxis, zaxis] = [xyz_axes[0][i] for i in range(3)]
+
+        # print([i for i in self.gyr_data.iloc[:,0]]) # first column
+
+        for i in range (95, xyz_axes.shape[0]):
+            print('loop # '+str(i))
+            gyr = np.array(self.gyr_data.iloc[:, i-1]) # get gyr date for previous frame
+            initial_axes = xyz_axes[i-1,:,:] # get axes for previous frame
+            scaled_axes = [initial_axes[j] * gyr[j] for j in range(3)] # scale axes by component rotation velocity
+            total_axis = np.sum(scaled_axes, axis=0) # axis of rotation
+            # norm_axis = total_axis/np.linalg.norm(total_axis) # normalized axis - NOT NECESSARY AS rotateQuaternion() already does this
+            norm_gyr = sqrt(np.sum(np.square(gyr))) # rotational velocity
+            angle = norm_gyr/148
+            print(initial_axes)
+
+            # TO DO: define 'angle', 
+            rotated_axes = np.array([rotateQuaternion(axisvector, pi/6, zaxis) for axisvector in initial_axes[i-1,:,:]])
+            # combined_axis = 
+            # rotated_axes = np.array([rotateQuaternion(j, pi/6, zaxis) for j in xyz_axes[i-1,:,:]])
+
     def plot_net_acc(self, scale):
         plt.plot(self.net_acc*scale, label = 'net acc '+self.name)
     
@@ -71,9 +93,6 @@ class imu:
             plt.plot(self.gyr_data.iloc[1]*scale, label= 'gyr roll '+self.name)
         if 'Y' in PRY:
             plt.plot(self.gyr_data.iloc[2]*scale, label= 'gyr yaw '+self.name)
-
-
-
 
 
 # Returns dataframe with 109 labeled indices
@@ -115,6 +134,7 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
         index = 'DelsysTrignoBase 1: Sensor '+str(sensor_placement)+'IM '+ACCorGYR+' '+axis_dict[PitRolYaw]
     return df.loc[index]
 
+
 def test_axis_rotation():
     xaxis = [1.,0.,0.]
     yaxis = [0.,1.,0.]
@@ -131,6 +151,7 @@ def test_axis_rotation():
         # print(xyz_axes[i,:,:])
         # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
 
+
 def plot_rotation(point, angle, axis, ax, name):
     t = np.linspace(0.0, angle, 100)
     x = np.zeros(100)
@@ -143,6 +164,7 @@ def plot_rotation(point, angle, axis, ax, name):
         z[i] = p[2]
     ax.plot(x, y, z, label=name)
     return(rotateQuaternion(point, angle, axis))
+
 
 def plot3axes(ax):
     ax.plot((-1.3,1.3), (0,0), (0,0), label='x')
@@ -158,9 +180,9 @@ def main():
 
     print(np.zeros(10))
 
-    # test_axis_rotation()
-    x1 = [1.,0.,0.]
-    plot_rotation(x1, pi/2, [0,1,0]) # rotate x=1 around y-axis
+    test_axis_rotation()
+    # x1 = [1.,0.,0.]
+    # plot_rotation(x1, pi/2, [0,1,0]) # rotate x=1 around y-axis
     # print(p2) 
     # p3 = rotateQuaternion(p2, pi/2, [1,0,0])
     # print(p3)
