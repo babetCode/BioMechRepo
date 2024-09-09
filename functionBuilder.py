@@ -52,9 +52,9 @@ class imu:
 
         self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
 
-        frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
-        xyz_axes = np.array([[[1,0,0] for i in range(frames)],
-        [[0,1,0] for i in range(frames)], [[0,0,1] for i in range(frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
+        self.frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
+        xyz_axes = np.array([[[1,0,0] for i in range(self.frames)],
+        [[0,1,0] for i in range(self.frames)], [[0,0,1] for i in range(self.frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
         # print(xyz_axes.shape)
         # print(xyz_axes[:,0,:])
         # for i in range(1, frames):
@@ -74,8 +74,8 @@ class imu:
             scaled_axes = [initial_axes[j] * gyr[j] for j in range(3)] # scale axes by component rotation velocity
             total_axis = np.sum(scaled_axes, axis=0) # axis of rotation
             # norm_axis = total_axis/np.linalg.norm(total_axis) # normalized axis - NOT NECESSARY AS rotateQuaternion() already does this
-            norm_gyr = sqrt(np.sum(np.square(gyr))) # rotational velocity
-            angle = norm_gyr/148
+            total_gyr = sqrt(np.sum(np.square(gyr))) # rotational velocity (in deg/sec?)
+            angle = total_gyr*(pi/180)/148
             print(initial_axes)
 
             # TO DO: define 'angle', 
