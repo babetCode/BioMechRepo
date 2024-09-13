@@ -37,6 +37,21 @@ def rotateQuaternion(point, angle, axis):
     return(result)
 
 
+
+def plot_rotation(point, angle, axis, ax, name):
+    t = np.linspace(0.0, angle, 100)
+    x = np.zeros(100)
+    y = np.zeros(100)
+    z = np.zeros(100)
+    for i in range(100):
+        p = rotateQuaternion(point, t[i], axis)
+        x[i] = p[0]
+        y[i] = p[1]
+        z[i] = p[2]
+    ax.plot(x, y, z, label=name)
+    return(rotateQuaternion(point, angle, axis))
+
+
 # Class object for IMUs
 class imu:
     def __init__(self, name, df, sensor_num):
@@ -52,9 +67,9 @@ class imu:
 
         self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
 
-        frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
-        xyz_axes = np.array([[[1,0,0] for i in range(frames)],
-        [[0,1,0] for i in range(frames)], [[0,0,1] for i in range(frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
+        self.frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
+        xyz_axes = np.array([[[1,0,0] for i in range(self.frames)],
+        [[0,1,0] for i in range(self.frames)], [[0,0,1] for i in range(self.frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
         # print(xyz_axes.shape)
         # print(xyz_axes[:,0,:])
         # for i in range(1, frames):
@@ -62,26 +77,34 @@ class imu:
         # print(xyz_axes[0,50,:])
 
     def raw_orientation(self):
-        xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(100)])
+        xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(self.frames)]) # xyz_axes[frame, axis, xyz vector]
         [xaxis, yaxis, zaxis] = [xyz_axes[0][i] for i in range(3)]
 
         # print([i for i in self.gyr_data.iloc[:,0]]) # first column
 
+        # set up 3d figure
+        plt.close('all')
+        my3dplot = plt.figure().add_subplot(projection='3d')
+        my3dplot.set_xlabel('x')
+        my3dplot.set_ylabel('y')
+        my3dplot.set_zlabel('z')
+        plot3axes(my3dplot)
+
         for i in range (95, xyz_axes.shape[0]):
-            print('loop # '+str(i))
+            # print('loop # '+str(i))
             gyr = np.array(self.gyr_data.iloc[:, i-1]) # get gyr date for previous frame
             initial_axes = xyz_axes[i-1,:,:] # get axes for previous frame
             scaled_axes = [initial_axes[j] * gyr[j] for j in range(3)] # scale axes by component rotation velocity
             total_axis = np.sum(scaled_axes, axis=0) # axis of rotation
             # norm_axis = total_axis/np.linalg.norm(total_axis) # normalized axis - NOT NECESSARY AS rotateQuaternion() already does this
             norm_gyr = sqrt(np.sum(np.square(gyr))) # rotational velocity
-            angle = norm_gyr/148
-            print(initial_axes)
-
-            # TO DO: define 'angle', 
-            rotated_axes = np.array([rotateQuaternion(axisvector, pi/6, zaxis) for axisvector in initial_axes[i-1,:,:]])
-            # combined_axis = 
-            # rotated_axes = np.array([rotateQuaternion(j, pi/6, zaxis) for j in xyz_axes[i-1,:,:]])
+            angle_deg = norm_gyr/148
+            angle_rad = angle_deg*pi/180
+            rotated_axes = np.array([rotateQuaternion(axisvector, angle_rad, total_axis) for axisvector in initial_axes]) # rotated axes for frame
+            xyz_axes[i,:,:]=rotated_axes # set axes to the calculated rotation
+        my3dplot.plot(xyz_axes[:999,0,0],xyz_axes[:999,0,1],xyz_axes[:999,0,2]) # plot the rotation of the x axis over time
+        my3dplot.plot(xyz_axes[:999,1,0],xyz_axes[:999,1,1],xyz_axes[:999,1,2]) # plot the rotation of the y axis over time
+        plt.show()
 
     def plot_net_acc(self, scale):
         plt.plot(self.net_acc*scale, label = 'net acc '+self.name)
@@ -150,20 +173,6 @@ def test_axis_rotation():
         #     print(j.shape)
         # print(xyz_axes[i,:,:])
         # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
-
-
-def plot_rotation(point, angle, axis, ax, name):
-    t = np.linspace(0.0, angle, 100)
-    x = np.zeros(100)
-    y = np.zeros(100)
-    z = np.zeros(100)
-    for i in range(100):
-        p = rotateQuaternion(point, t[i], axis)
-        x[i] = p[0]
-        y[i] = p[1]
-        z[i] = p[2]
-    ax.plot(x, y, z, label=name)
-    return(rotateQuaternion(point, angle, axis))
 
 
 def plot3axes(ax):
