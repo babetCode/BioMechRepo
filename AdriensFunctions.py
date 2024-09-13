@@ -135,7 +135,7 @@ def c3d_analogs_df(participant, speed, trial, path):
 
 def adrienC3Dpath():
     print(str(__file__))
-    if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\ABabet_490R-1\\AdriensFunctions.py':
+    if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\VScodeIMUrepo\\AdriensFunctions.py':
         mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
     elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/AdriensFunctions.py':
         mypath = '/Users/adrienbabet/Documents/490R/Walking C3D files/'
