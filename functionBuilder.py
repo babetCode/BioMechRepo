@@ -138,6 +138,8 @@ def adrienC3Dpath():
         mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
     elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/functionBuilder.py':
         mypath = '/Users/adrienbabet/Documents/490R/Walking C3D files/'
+    elif str(__file__) == 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code\\functionBuilder.py':
+        mypath = 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/'
     return mypath
 
 
