@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
-from functionBuilder import *
+from AdriensFunctions import *
 
 
 def main():
