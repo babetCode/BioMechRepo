@@ -90,7 +90,7 @@ class imu:
         my3dplot.set_zlabel('z')
         plot3axes(my3dplot)
 
-        for i in range (95, xyz_axes.shape[0]):
+        for i in range (self.frames):
             # print('loop # '+str(i))
             gyr = np.array(self.gyr_data.iloc[:, i-1]) # get gyr date for previous frame
             initial_axes = xyz_axes[i-1,:,:] # get axes for previous frame
@@ -98,13 +98,14 @@ class imu:
             total_axis = np.sum(scaled_axes, axis=0) # axis of rotation
             # norm_axis = total_axis/np.linalg.norm(total_axis) # normalized axis - NOT NECESSARY AS rotateQuaternion() already does this
             norm_gyr = sqrt(np.sum(np.square(gyr))) # rotational velocity
-            angle = norm_gyr/148
-            print(initial_axes)
+            angle_deg = norm_gyr/148
+            angle_rad = angle_deg * pi/180 
+            rotated_axes = np.array([rotateQuaternion(axisvector, angle_rad, total_axis) for axisvector in initial_axes])
+            print(rotated_axes)
+            xyz_axes[i,:,:] = rotated_axes
+        my3dplot.plot(xyz_axes[:,0,0], xyz_axes[:,0,1], xyz_axes[:,0,2])
+        plt.show()
 
-            # TO DO: define 'angle', 
-            rotated_axes = np.array([rotateQuaternion(axisvector, pi/6, zaxis) for axisvector in initial_axes[i-1,:,:]])
-            # combined_axis = 
-            # rotated_axes = np.array([rotateQuaternion(j, pi/6, zaxis) for j in xyz_axes[i-1,:,:]])
 
     def plot_net_acc(self, scale):
         plt.plot(self.net_acc*scale, label = 'net acc '+self.name)
