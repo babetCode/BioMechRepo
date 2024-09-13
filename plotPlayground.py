@@ -25,14 +25,10 @@ def main():
 
 
     # make 3d plots
-    p1 = [1.,0.,0.]
     plot3axes(my3dplot)
-    p2 = plot_rotation(p1, .5*pi, [0,1,0], my3dplot, 'first') # rotate x=1 around y-axis
-    print(p2)
-    point3 = plot_rotation(p2, .5*pi, [1,0,0], my3dplot, 'second') # rotate x=1 around y-axis
-    point4 = plot_rotation(p1, pi, [1,1,0], my3dplot, 'around')
-    plot_rotation(p1, 2*pi, [1,1,1], my3dplot, 'around')
-    plot_rotation(p1, .5*pi, [0,0,1], my3dplot, 'around')
+    points = [[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]
+    for point in points:
+        plot_rotation(point, .5*pi, [1,1,1], my3dplot, 'around')
 
     # plot_rotation(x1, pi*2, [0,0,1], my3dplot) # rotate x=1 around z-axis
     # plot_rotation(y1, pi*2, [1,0,0], my3dplot) # rotate x=1 around z-axis
