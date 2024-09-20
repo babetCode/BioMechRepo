@@ -101,7 +101,7 @@ class imu:
             angle_deg = norm_gyr/148
             angle_rad = angle_deg * pi/180 
             rotated_axes = np.array([rotateQuaternion(axisvector, angle_rad, total_axis) for axisvector in initial_axes])
-            print(rotated_axes)
+            #print(rotated_axes)
             xyz_axes[i,:,:] = rotated_axes
         my3dplot.plot(xyz_axes[:,0,0], xyz_axes[:,0,1], xyz_axes[:,0,2])
         plt.show()
