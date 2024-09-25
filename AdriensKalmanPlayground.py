@@ -55,10 +55,15 @@ x_k   = state variable            (nx1 column vector)
 z_k   = measurment                (mx1 column vector)
 A =   state transition matrix     (nxm matrix)
 H   = state-to-measurement matrix (mxn matrix)
-w_k = state transition noise
+w_k = state transition noise      (nx1 column vector)
+v_k = measurment noise            (mx1 column vector)
+
+Q = covariace matrix of w_k (nxn diagonal matrix) --- np.fill_diagonal
+R = covariance matrix of v_k (mxm diagonal matrix)
+
 
 """
-
+# end of notes
 
 
 """ first order low pass filter  """
@@ -76,8 +81,21 @@ def LPF(data, alpha, initial = 'NA'):
             estimates.append(alpha*estimates[prev] + (1-alpha)*measurment) 
         return estimates[1:]
 
+
+""" Basic Kalman Filter """
+def Simple_Kalman(measurments, initial_state, state_transition, measurement_model, process_noise, measurement_covariance):
+    A = state_transition
+    H = measurement_model
+    Q = process_noise
+    R = measurement_covariance
+
+
+
+""" main program """
 def main():
     result = LPF([1,2,3,4,5,6,7,8,9],0.5,2) 
     print(result)
+
+
 if __name__ == "__main__":
     main()
