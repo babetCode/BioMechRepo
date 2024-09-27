@@ -1,4 +1,5 @@
 from AdriensFunctions import *
+from random import *
 
 """
 https://www.youtube.com/watch?v=HCd-leV8OkU
@@ -106,10 +107,18 @@ def Simple_Kalman(
     return filtered_data
 
 
+def noisy_data(value, length, noise):
+    data = np.ones(length)
+    data = data * value
+    for i, point in enumerate(data):
+        data[i] += randrange(-1*noise, noise+1)
+    return data
+
 """ main program """
 def main():
-    result = Simple_Kalman([1,2,3,4,5,6,7,8,9]) 
-    print(result)
+    result = Simple_Kalman([1,2,3,4,5,6,7,8,9])
+    noisy = noisy_data(0, 25, 10)
+    print(noisy)
 
 
 if __name__ == "__main__":
