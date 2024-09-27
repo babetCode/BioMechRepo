@@ -83,17 +83,32 @@ def LPF(data, alpha, initial = 'NA'):
 
 
 """ Basic Kalman Filter """
-def Simple_Kalman(measurments, initial_state, state_transition, measurement_model, process_noise, measurement_covariance):
+def Simple_Kalman(
+    measurments, initial_state=14, initial_error_covariance=6, state_transition=1,
+    measurement_model=1, process_noise=0, measurement_covariance=4
+):
+    # set variables
     A = state_transition
     H = measurement_model
     Q = process_noise
     R = measurement_covariance
-
+    P = initial_error_covariance
+    x = initial_state
+    filtered_data = []
+    # kalman algorithm
+    for z in measurments:
+        xp = A * x                                                              # prediction of estimate
+        Pp = A * P * np.transpose(A) + Q                                        # prediction of error cov
+        K = Pp * np.transpose(H) * (1/(H * Pp * np.transpose(H) + R))           # kalman gain
+        x = xp + K * (z - H * xp)                                               # state estimate
+        P = Pp - K * H * Pp                                                     # error cov
+        filtered_data.append(x)
+    return filtered_data
 
 
 """ main program """
 def main():
-    result = LPF([1,2,3,4,5,6,7,8,9],0.5,2) 
+    result = Simple_Kalman([1,2,3,4,5,6,7,8,9]) 
     print(result)
 
 
