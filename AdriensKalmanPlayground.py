@@ -85,8 +85,8 @@ def LPF(data, alpha, initial = 'NA'):
 
 """ Basic Kalman Filter """
 def Simple_Kalman(
-    measurments, initial_state=14, initial_error_covariance=6, state_transition=1,
-    measurement_model=1, process_noise=0, measurement_covariance=4
+    measurments, initial_state=0, initial_error_covariance=6, state_transition=1.03,
+    measurement_model=1, process_noise=0, measurement_covariance=1
 ):
     # set variables
     A = state_transition
@@ -108,17 +108,22 @@ def Simple_Kalman(
 
 
 def noisy_data(value, length, noise):
-    data = np.ones(length)
-    data = data * value
+    data = [sin(i/20) for i in range(length)]
     for i, point in enumerate(data):
-        data[i] += randrange(-1*noise, noise+1)
+        data[i] += uniform(-1*noise, noise)
     return data
 
 """ main program """
 def main():
     result = Simple_Kalman([1,2,3,4,5,6,7,8,9])
-    noisy = noisy_data(0, 25, 10)
-    print(noisy)
+    noisy = noisy_data(0, 1000, 0.5)
+    noise = noisy_data(0, 1000, 0)
+    noisyk = Simple_Kalman(noisy)
+    plt.plot(noisy)
+    plt.plot(noise)
+    plt.plot(noisyk)
+    plt.show()
+    #print(noisy)
 
 
 if __name__ == "__main__":
