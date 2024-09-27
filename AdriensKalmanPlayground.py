@@ -97,6 +97,7 @@ def Simple_Kalman(
     x = initial_state
     filtered_data = []
     # kalman algorithm
+    #consider variable for A^T and H^T
     for z in measurments:
         xp = A * x                                                              # prediction of estimate
         Pp = A * P * np.transpose(A) + Q                                        # prediction of error cov
