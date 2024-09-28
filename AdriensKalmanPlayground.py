@@ -90,20 +90,22 @@ def Simple_Kalman(
 ):
     # set variables
     A = state_transition
+    At = np.transpose(A)
     H = measurement_model
+    Ht = np.transpose(H)
     Q = process_noise
     R = measurement_covariance
-    P = initial_error_covariance
     x = initial_state
+    P = initial_error_covariance
+    
     filtered_data = []
     # kalman algorithm
-    #consider variable for A^T and H^T
     for z in measurments:
-        xp = A * x                                                              # prediction of estimate
-        Pp = A * P * np.transpose(A) + Q                                        # prediction of error cov
-        K = Pp * np.transpose(H) * (1/(H * Pp * np.transpose(H) + R))           # kalman gain
-        x = xp + K * (z - H * xp)                                               # state estimate
-        P = Pp - K * H * Pp                                                     # error cov
+        xp = A * x                              # predict state
+        Pp = A * P * At + Q                     # predict error cov
+        K = Pp * Ht * (1/(H * Pp * Ht + R))     # calculate gain
+        x = xp + K * (z - H * xp)               # calculate state estimate
+        P = Pp - K * H * Pp                     # calculate error cov
         filtered_data.append(x)
     return filtered_data
 
