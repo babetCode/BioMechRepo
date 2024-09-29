@@ -23,21 +23,16 @@ def rotateQuaternion(point, angle, axis):
     normalizedAxis = axis/np.linalg.norm(axis)
     q_inv = [cos(angle/2)]
     q = [cos(angle/2)]
-    q_inv = [cos(angle/2)]
     for value in normalizedAxis:
         q.append(sin(angle/2)*value)
         q_inv.append(-sin(angle/2)*value)
     pointQuat = [0, point[0], point[1], point[2]]
     rotation = multiplyQuaternion(multiplyQuaternion(q, pointQuat), q_inv)
     result = [float(i) for i in rotation[1:]]
-    roundedPoint = [round(i, 3) for i in point]
-    roundedAngle = round(angle, 3)
-    roundedAxis = [round(i, 3) for i in axis]
-    roundedResult = [round(i, 3) for i in result]
     return(result)
 
 
-
+# Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure
 def plot_rotation(point, angle, axis, ax, name):
     t = np.linspace(0.0, angle, 100)
     x = np.zeros(100)
@@ -133,8 +128,8 @@ def c3d_analogs_df(participant, speed, trial, path):
     return df
 
 
+# Gets path for C3D files on Adriens computers and Thomas' laptop
 def adrienC3Dpath():
-    print(str(__file__))
     if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\VScodeIMUrepo\\AdriensFunctions.py':
         mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
     elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/AdriensFunctions.py':
@@ -144,6 +139,7 @@ def adrienC3Dpath():
     return mypath
 
 
+# OBSOLETE since IMU class does this already
 def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
     axis_dict = {'P': 'Pitch', 'Y': 'Yaw', 'R': 'Roll'}
     if type(sensor_placement) == str:
@@ -162,6 +158,7 @@ def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
     return df.loc[index]
 
 
+# OBSOLETE only used for testing
 def test_axis_rotation():
     xaxis = [1.,0.,0.]
     yaxis = [0.,1.,0.]
@@ -179,6 +176,7 @@ def test_axis_rotation():
         # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
 
 
+# plot the x, y, and z axes on the given figure 'ax'
 def plot3axes(ax):
     ax.plot((-1.3,1.3), (0,0), (0,0), label='x')
     ax.plot((0,0), (-1.3,1.3), (0,0), label='y')
