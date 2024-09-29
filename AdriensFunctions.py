@@ -7,8 +7,23 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-#multiply  two quaternions, given as 4-item lists
 def multiplyQuaternion(q1, q2):
+    """
+    Multiply  two quaternions, given as 4-item lists.
+
+    Parameters
+    -
+    q1 (3 item iterable)
+        First Quaternion
+    q2 (3 item iterable)
+        second quaternion
+
+    Returns
+    -
+    Quaternion (list)
+        [scalar, i, j, k]
+
+    """
     [w1, x1, y1, z1] = [value for value in q1]
     [w2, x2, y2, z2] = [value for value in q2]
     scalar = w1*w2 - x1*x2 - y1*y2 - z1*z2
@@ -18,8 +33,25 @@ def multiplyQuaternion(q1, q2):
     return([scalar, i, j, k])
 
 
-# Rotates point (3 item list) by angle (radians) around axis through origin (3 item list)
-def rotateQuaternion(point, angle, axis):
+def rotateQuaternion(point, axis, angle: float):
+    """
+    Rotates 'point' around the 'axis' through origin by the 'angle' (in radians).
+
+    Parameters
+    -
+    point (3 item iterable)
+        Point as [point x, point y, point z]
+    axis (3 item iterable)
+        axis as [axis x, axis y, axis z].
+        The rotation will be around the line through this point and [0, 0, 0].
+    angle (float)
+        angle in radians
+
+    Returns
+    -
+    Rotated Point (list)
+        [point x, point y, point z]
+    """
     normalizedAxis = axis/np.linalg.norm(axis)
     q_inv = [cos(angle/2)]
     q = [cos(angle/2)]
@@ -32,8 +64,33 @@ def rotateQuaternion(point, angle, axis):
     return(result)
 
 
-# Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure
-def plot_rotation(point, angle, axis, ax, name):
+# Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
+def plot_rotation(point, axis, angle, figure, name):
+    """
+    Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
+
+    Parameters
+    -
+    point (3 item iterable)
+        Point as [point x, point y, point z]
+    axis (3 item iterable)
+        axis as [axis x, axis y, axis z].
+        The rotation will be around the line through this point and [0, 0, 0].
+    angle (float)
+        angle in radians
+    figure: pyplot figure
+        It is reccomended to create figure using: \n
+            plt.figure().add_subplot(projection='3d'). \n
+        It may also be useful to use: \n
+            my3dplot.set_xlabel('x') \n
+            my3dplot.set_ylabel('y') \n
+            my3dplot.set_zlabel('z').
+
+    Returns
+    -
+    Rotated Point (list)
+        [point x, point y, point z]
+    """
     t = np.linspace(0.0, angle, 100)
     x = np.zeros(100)
     y = np.zeros(100)
@@ -43,12 +100,37 @@ def plot_rotation(point, angle, axis, ax, name):
         x[i] = p[0]
         y[i] = p[1]
         z[i] = p[2]
-    ax.plot(x, y, z, label=name)
+    figure.plot(x, y, z, label=name)
     return(rotateQuaternion(point, angle, axis))
 
 
 # Class object for IMUs
 class imu:
+    """
+    Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
+
+    Parameters
+    -
+    point (3 item iterable)
+        Point as [point x, point y, point z]
+    axis (3 item iterable)
+        axis as [axis x, axis y, axis z].
+        The rotation will be around the line through this point and [0, 0, 0].
+    angle (float)
+        angle in radians
+    figure: pyplot figure
+        It is reccomended to create figure using: \n
+            plt.figure().add_subplot(projection='3d'). \n
+        It may also be useful to use: \n
+            my3dplot.set_xlabel('x') \n
+            my3dplot.set_ylabel('y') \n
+            my3dplot.set_zlabel('z').
+
+    Returns
+    -
+    Rotated Point (list)
+        [point x, point y, point z]
+    """
     def __init__(self, name, df, sensor_num):
         self.name = name
         self.indices = [row for row in df.index] # list of analog labels
