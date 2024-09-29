@@ -110,6 +110,33 @@ def Simple_Kalman(
     return filtered_data
 
 
+""" Fully Quaternion Based Kalman Filter """
+def Quaternion_Kalman(
+    measurments, initial_state=0, initial_error_covariance=6, state_transition=1.03,
+    measurement_model=1, process_noise=0, measurement_covariance=1
+):
+    # set variables
+    A = state_transition
+    At = np.transpose(A)
+    H = measurement_model
+    Ht = np.transpose(H)
+    Q = process_noise
+    R = measurement_covariance
+    x = initial_state
+    P = initial_error_covariance
+    
+    filtered_data = []
+    # kalman algorithm
+    for z in measurments:
+        xp = A * x                              # predict state
+        Pp = A * P * At + Q                     # predict error cov
+        K = Pp * Ht * (1/(H * Pp * Ht + R))     # calculate gain
+        x = xp + K * (z - H * xp)               # calculate state estimate
+        P = Pp - K * H * Pp                     # calculate error cov
+        filtered_data.append(x)
+    return filtered_data
+
+
 def noisy_data(value, length, noise):
     data = [sin(i/20) for i in range(length)]
     for i, point in enumerate(data):
