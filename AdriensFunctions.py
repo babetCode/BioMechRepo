@@ -317,6 +317,7 @@ def main():
     mypath = adrienC3Dpath()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
     myIMU = imu('myFirstIMU', df, 5)
+    print(myIMU.all_data)
 
 if __name__ == '__main__':
     main()

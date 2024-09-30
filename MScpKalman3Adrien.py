@@ -50,21 +50,34 @@ class QuaternionKalmanFilter:
     def get_orientation(self):
         return self.q
 
-# Example usage:
-dt = 0.01  # Time step
-process_noise = 1e-5
-measurement_noise = 1e-3
+# Import the necessary functions and classes from AdriensFunctions.py
+from AdriensFunctions import adrienC3Dpath, c3d_analogs_df, imu
 
-kf = QuaternionKalmanFilter(dt, process_noise, measurement_noise)
+def main():
+    dt = 0.01  # Time step
+    process_noise = 1e-5
+    measurement_noise = 1e-3
 
-# Simulated IMU data (angular velocity and orientation measurements)
-imu_data = [
-    {"omega": [0.01, 0.02, -0.01], "orientation": [0.99, 0.01, 0.02]},
-    {"omega": [0.02, -0.01, 0.03], "orientation": [0.98, -0.02, 0.03]},
-    {"omega": [-0.01, 0.03, -0.02], "orientation": [0.97, 0.03, -0.01]},
-]
+    kf = QuaternionKalmanFilter(dt, process_noise, measurement_noise)
 
-for data in imu_data:
-    kf.predict(data["omega"])
-    kf.update(data["orientation"])
-    print("Estimated orientation:", kf.get_orientation())
+    mypath = adrienC3Dpath()
+    df = c3d_analogs_df('C07', 'Fast', '07', mypath)
+    myIMU = imu('myFirstIMU', df, 5)
+
+    all_data = myIMU.all_data.T.to_numpy()  # Transpose to get frames as rows and convert to numpy array
+
+    for frame in all_data:
+        linear_acceleration = frame[:3]  # Linear acceleration around the body pitch, roll, and yaw axes
+        angular_velocity = frame[3:6]  # Angular velocity measurements around the body pitch, roll, and yaw axes
+
+        kf.predict(angular_velocity)
+        
+        # Assuming we have some orientation measurements to update the filter with.
+        orientation_measurement = np.array([0.99, 0.01, 0.02])  # Placeholder for actual orientation measurements
+        
+        kf.update(orientation_measurement)
+        
+        print("Estimated orientation:", kf.get_orientation())
+
+if __name__ == '__main__':
+    main()
