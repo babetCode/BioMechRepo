@@ -14,14 +14,14 @@ def multiplyQuaternion(q1, q2):
     Parameters
     -
     q1 (3 item iterable)
-        First Quaternion
+        First Quaternion.
     q2 (3 item iterable)
-        second quaternion
+        second quaternion.
 
     Returns
     -
     Quaternion (list)
-        [scalar, i, j, k]
+        [scalar, i, j, k].
 
     """
     [w1, x1, y1, z1] = [value for value in q1]
@@ -40,17 +40,17 @@ def rotateQuaternion(point, axis, angle: float):
     Parameters
     -
     point (3 item iterable)
-        Point as [point x, point y, point z]
+        Point as [point x, point y, point z].
     axis (3 item iterable)
         axis as [axis x, axis y, axis z].
         The rotation will be around the line through this point and [0, 0, 0].
     angle (float)
-        angle in radians
+        angle in radians.
 
     Returns
     -
     Rotated Point (list)
-        [point x, point y, point z]
+        [point x, point y, point z].
     """
     normalizedAxis = axis/np.linalg.norm(axis)
     q_inv = [cos(angle/2)]
@@ -64,7 +64,6 @@ def rotateQuaternion(point, axis, angle: float):
     return(result)
 
 
-# Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
 def plot_rotation(point, axis, angle, figure, name):
     """
     Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
@@ -72,12 +71,11 @@ def plot_rotation(point, axis, angle, figure, name):
     Parameters
     -
     point (3 item iterable)
-        Point as [point x, point y, point z]
+        Point as [point x, point y, point z].
     axis (3 item iterable)
-        axis as [axis x, axis y, axis z].
-        The rotation will be around the line through this point and [0, 0, 0].
+        axis as [axis x, axis y, axis z]. The rotation will be around the line through this point and [0, 0, 0].
     angle (float)
-        angle in radians
+        angle in radians.
     figure: pyplot figure
         It is reccomended to create figure using: \n
             plt.figure().add_subplot(projection='3d'). \n
@@ -89,7 +87,7 @@ def plot_rotation(point, axis, angle, figure, name):
     Returns
     -
     Rotated Point (list)
-        [point x, point y, point z]
+        [point x, point y, point z].
     """
     t = np.linspace(0.0, angle, 100)
     x = np.zeros(100)
@@ -104,20 +102,12 @@ def plot_rotation(point, axis, angle, figure, name):
     return(rotateQuaternion(point, angle, axis))
 
 
-# Class object for IMUs
-class imu:
+def plot3axes(figure):
     """
-    Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
+    Plots the x, y, and z axes on the 'ax' figure. Does not include plt.show()
 
     Parameters
     -
-    point (3 item iterable)
-        Point as [point x, point y, point z]
-    axis (3 item iterable)
-        axis as [axis x, axis y, axis z].
-        The rotation will be around the line through this point and [0, 0, 0].
-    angle (float)
-        angle in radians
     figure: pyplot figure
         It is reccomended to create figure using: \n
             plt.figure().add_subplot(projection='3d'). \n
@@ -125,11 +115,101 @@ class imu:
             my3dplot.set_xlabel('x') \n
             my3dplot.set_ylabel('y') \n
             my3dplot.set_zlabel('z').
+    """
+    figure.plot((-1.3,1.3), (0,0), (0,0), label='x')
+    figure.plot((0,0), (-1.3,1.3), (0,0), label='y')
+    figure.plot((0,0), (0,0), (-1.3,1.3), label='z')
+
+
+def adrienC3Dpath():
+    """
+    Gets directory path for C3D files on Adriens computers.
 
     Returns
     -
-    Rotated Point (list)
-        [point x, point y, point z]
+    mypath: str
+        My file path.
+    """
+    if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\VScodeIMUrepo\\AdriensFunctions.py':
+        mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
+    elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/AdriensFunctions.py':
+        mypath = '/Users/adrienbabet/Documents/490R/Walking C3D files/'
+    elif str(__file__) == 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code\\AdriensFunctions.py':
+        mypath = 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/'
+    return mypath
+
+
+def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
+    """
+    Returns pandas dataframe with IMU data.
+
+    Parameters
+    -
+    participant: str
+        Participant number as string.
+    speed: str
+        trial speed as string.
+    trial: str
+        trial number as string.
+    path: str
+        directory path as string. If you have set it up, using adrienC3Dpath() is reccomended.
+
+    Returns
+    -
+    df: dataframe
+        dataframe containing trial data.
+    """
+    filename = (
+        participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
+    file_path = path+filename
+    myc3d = c3d(file_path)
+    point_data = myc3d['data']['points']
+    analog_data = myc3d['data']['analogs']
+    analogs = analog_data[0, :, :]
+    analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
+    df = pd.DataFrame(data=analogs, index=analog_labels)
+    return df
+
+
+class imu:
+    """
+    Contains data structure and functionality for analyzing IMU measurements.
+
+    Parameters
+    -
+    name: string
+        Name for the IMU.
+    df: dataframe
+        dataframe containing IMU measurements. Using c3d_analogs_df() is reccomended.
+    sensor_num: any
+        Sensor nubmer will be converted to string to index data from df.
+
+    Attributes
+    -
+    name: str
+        As initialized.
+    indices: list
+        List of analog labels from df.
+    start_row_index: int
+        Index of the first row in df which contains data for this IMU.
+    all_data: dataframe
+        Data from df for this specific IMU.
+    acc_data: dataframe
+        Acceleration data from all_data.
+    net_acc: dataframe
+        Net acceleration.
+    frames: int
+        Number of frames in df.
+    gyr_data: dataframe
+        Gyroscopic data from df.
+
+    Methods
+    -
+    raw_orientation()
+        Attemts to determine orientation with raw data.
+    test()
+        pass.
+
     """
     def __init__(self, name, df, sensor_num):
         self.name = name
@@ -138,20 +218,11 @@ class imu:
         self.all_data = df.iloc[self.start_row_index : self.start_row_index+6] # get dataframe of the 6 rows
         
         self.acc_data = self.all_data.iloc[0:3] # get the first 3 rows of acc data
-        self.sqrt_acc = np.square(self.acc_data) # square of all acc data
-        self.net_acc_sq = self.sqrt_acc.apply(np.sum, axis=0, raw=True) # sum of P,R,Y acc squares for each frame
-        self.net_acc = np.sqrt(self.net_acc_sq) # net acc for each frame
-
+        sqrt_acc = np.square(self.acc_data) # square of all acc data
+        net_acc_sq = sqrt_acc.apply(np.sum, axis=0, raw=True) # sum of P,R,Y acc squares for each frame
+        self.net_acc = np.sqrt(net_acc_sq) # net acc for each frame
         self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
-
         self.frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
-        xyz_axes = np.array([[[1,0,0] for i in range(self.frames)],
-        [[0,1,0] for i in range(self.frames)], [[0,0,1] for i in range(self.frames)]]) # make array for axes. [:,i,:] gets frame i, [0:,i,:] gets x-axis of frame i
-        # print(xyz_axes.shape)
-        # print(xyz_axes[:,0,:])
-        # for i in range(1, frames):
-        #     xyz_axes[:,i,:] = xyz_axes[:,i,:]+xyz_axes[:,i-1,:]
-        # print(xyz_axes[0,50,:])
 
     def raw_orientation(self):
         xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(self.frames)]) # xyz_axes[frame, axis, xyz vector]
@@ -194,75 +265,6 @@ class imu:
             plt.plot(self.gyr_data.iloc[1]*scale, label= 'gyr roll '+self.name)
         if 'Y' in PRY:
             plt.plot(self.gyr_data.iloc[2]*scale, label= 'gyr yaw '+self.name)
-
-
-# Returns dataframe with 109 labeled indices
-def c3d_analogs_df(participant, speed, trial, path):
-    filename = (
-        participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
-    file_path = path+filename
-    myc3d = c3d(file_path)
-    point_data = myc3d['data']['points']
-    analog_data = myc3d['data']['analogs']
-    analogs = analog_data[0, :, :]
-    analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
-    df = pd.DataFrame(data=analogs, index=analog_labels)
-    return df
-
-
-# Gets path for C3D files on Adriens computers and Thomas' laptop
-def adrienC3Dpath():
-    if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\VScodeIMUrepo\\AdriensFunctions.py':
-        mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
-    elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/AdriensFunctions.py':
-        mypath = '/Users/adrienbabet/Documents/490R/Walking C3D files/'
-    elif str(__file__) == 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code\\AdriensFunctions.py':
-        mypath = 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/'
-    return mypath
-
-
-# OBSOLETE since IMU class does this already
-def get_sensor_data(sensor_placement, ACCorGYR, PitRolYaw, df):
-    axis_dict = {'P': 'Pitch', 'Y': 'Yaw', 'R': 'Roll'}
-    if type(sensor_placement) == str:
-        OneToEleven = [i+1 for i in range(11)]
-        IMU_placements = []
-        for side in ['L', 'R']:
-            for part in ['Thigh', 'Shank']:
-                for place in ['Proximal', 'Distal']:
-                    IMU_placements.append(side+place+part)
-            IMU_placements.append(side+'Foot')
-        IMU_placements.append('Sacrum')
-        IMU_dict = dict(zip(IMU_placements, OneToEleven))
-        index = 'DelsysTrignoBase 1: Sensor '+str(IMU_dict[sensor_placement])+'IM '+ACCorGYR+' '+axis_dict[PitRolYaw]
-    elif type(sensor_placement) == int:
-        index = 'DelsysTrignoBase 1: Sensor '+str(sensor_placement)+'IM '+ACCorGYR+' '+axis_dict[PitRolYaw]
-    return df.loc[index]
-
-
-# OBSOLETE only used for testing
-def test_axis_rotation():
-    xaxis = [1.,0.,0.]
-    yaxis = [0.,1.,0.]
-    zaxis = [0.,0.,1.]
-    xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(5)])
-    for i in range (1, xyz_axes.shape[0]):
-        print('last axis:\n', xyz_axes[i-1], xyz_axes[i].shape)
-        rotated_axes = np.array([rotateQuaternion(j, pi/6, zaxis) for j in xyz_axes[i-1,:,:]])
-        print('rotated axis:\n', rotated_axes, rotated_axes.shape)
-        xyz_axes[i] = rotated_axes
-        print('new xyz:\n', xyz_axes[i])
-        # for j in xyz_axes[i]:
-        #     print(j.shape)
-        # print(xyz_axes[i,:,:])
-        # print([rotateQuaternion(i, pi/6, zaxis) for i in xyz_axes[:,i-1,:]])
-
-
-# plot the x, y, and z axes on the given figure 'ax'
-def plot3axes(ax):
-    ax.plot((-1.3,1.3), (0,0), (0,0), label='x')
-    ax.plot((0,0), (-1.3,1.3), (0,0), label='y')
-    ax.plot((0,0), (0,0), (-1.3,1.3), label='z')
 
 
 def main():
