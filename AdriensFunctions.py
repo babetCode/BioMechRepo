@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def multiplyQuaternion(q1, q2):
+def quaternion_multiply(q1, q2):
     """
     Multiply  two quaternions, given as 4-item lists.
 
     Parameters
     -
-    q1 (3 item iterable)
+    q1 (4 item iterable)
         First Quaternion.
-    q2 (3 item iterable)
+    q2 (4 item iterable)
         second quaternion.
 
     Returns
@@ -24,13 +24,14 @@ def multiplyQuaternion(q1, q2):
         [scalar, i, j, k].
 
     """
-    [w1, x1, y1, z1] = [value for value in q1]
-    [w2, x2, y2, z2] = [value for value in q2]
-    scalar = w1*w2 - x1*x2 - y1*y2 - z1*z2
-    i = w1*x2 + x1*w2 + y1*z2 - z1*y2
-    j = w1*y2 + y1*w2 + z1*x2 - x1*z2
-    k = w1*z2 + z1*w2 + x1*y2 -y1*x2
-    return([scalar, i, j, k])
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    return np.array([
+        w1*w2 - x1*x2 - y1*y2 - z1*z2,
+        w1*x2 + x1*w2 + y1*z2 - z1*y2,
+        w1*y2 - x1*z2 + y1*w2 + z1*x2,
+        w1*z2 + x1*y2 - y1*x2 + z1*w2
+    ])
 
 
 def rotateQuaternion(point, axis, angle: float):
@@ -59,7 +60,7 @@ def rotateQuaternion(point, axis, angle: float):
         q.append(sin(angle/2)*value)
         q_inv.append(-sin(angle/2)*value)
     pointQuat = [0, point[0], point[1], point[2]]
-    rotation = multiplyQuaternion(multiplyQuaternion(q, pointQuat), q_inv)
+    rotation = quaternion_multiply(quaternion_multiply(q, pointQuat), q_inv)
     result = [float(i) for i in rotation[1:]]
     return(result)
 
@@ -320,7 +321,6 @@ def main():
 
     print(np.zeros(10))
 
-    test_axis_rotation()
     # x1 = [1.,0.,0.]
     # plot_rotation(x1, pi/2, [0,1,0]) # rotate x=1 around y-axis
     # print(p2) 
