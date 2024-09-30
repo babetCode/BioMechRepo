@@ -171,6 +171,51 @@ def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     return df
 
 
+def kalman(
+    measurments, initial_state=0, initial_error_covariance=6, state_transition=1.03,
+    measurement_model=1, process_noise=0, measurement_covariance=1
+):
+    """
+    A simple kalman filter.
+
+    Parameters
+    -
+    measurments: numpy array
+        Array of nx1 column vector measurments.
+    initial_state: numpy array
+        predicted initial state as mx1 column vector.
+    trial: str
+        trial number as string.
+    path: str
+        directory path as string. If you have set it up, using adrienC3Dpath() is reccomended.
+
+    Returns
+    -
+    df: dataframe
+        dataframe containing trial data.
+    """
+    # set variables
+    A = state_transition
+    At = np.transpose(A)
+    H = measurement_model
+    Ht = np.transpose(H)
+    Q = process_noise
+    R = measurement_covariance
+    x = initial_state
+    P = initial_error_covariance
+    
+    filtered_data = []
+    # kalman algorithm
+    for z in measurments:
+        xp = A * x                              # predict state
+        Pp = A * P * At + Q                     # predict error cov
+        K = Pp * Ht * (1/(H * Pp * Ht + R))     # calculate gain
+        x = xp + K * (z - H * xp)               # calculate state estimate
+        P = Pp - K * H * Pp                     # calculate error cov
+        filtered_data.append(x)
+    return filtered_data
+
+
 class imu:
     """
     Contains data structure and functionality for analyzing IMU measurements.
