@@ -70,7 +70,7 @@ def animate_imu_rotation(kf, all_data, animation_speed=1.0):
     ax.set_zlabel('Z')
 
     # Load the 3D model and scale it down
-    imu_mesh = mesh.Mesh.from_file('imu_model.stl')
+    imu_mesh = mesh.Mesh.from_file('house.stl')
     imu_mesh.vectors /= 10.0  # Scale down the model by a factor of 10
 
     # Create a Poly3DCollection with lighting enabled
