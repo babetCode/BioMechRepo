@@ -54,7 +54,7 @@ class QuaternionKalmanFilter:
         return self.q
 
 # Import the necessary functions and classes from AdriensFunctions.py
-from AdriensFunctions import adrienC3Dpath, c3d_analogs_df, imu
+from imufunctions import adrienC3Dpath, c3d_analogs_df, imu
 
 def animate_imu_rotation(kf, all_data, animation_speed=1.0):
     fig = plt.figure()

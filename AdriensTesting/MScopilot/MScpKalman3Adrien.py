@@ -51,7 +51,7 @@ class QuaternionKalmanFilter:
         return self.q
 
 # Import the necessary functions and classes from AdriensFunctions.py
-from AdriensFunctions import adrienC3Dpath, c3d_analogs_df, imu
+from imufunctions import adrienC3Dpath, c3d_analogs_df, imu
 
 def main():
     dt = 0.01  # Time step
