@@ -19,7 +19,6 @@ def adrienC3Dpath():
         if path in str(__file__):
             return(pathfinder[path])
             break
-        print('test')
 
 print(adrienC3Dpath())
 
