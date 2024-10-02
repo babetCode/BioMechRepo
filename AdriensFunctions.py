@@ -131,13 +131,15 @@ def adrienC3Dpath():
     mypath: str
         My file path.
     """
-    if str(__file__) == 'c:\\Users\\goper\\Files\\vsCode\\490R\\VScodeIMUrepo\\AdriensFunctions.py':
-        mypath = ('C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
-    elif str(__file__) == '/Users/adrienbabet/Documents/490R/IMU_gait_analysis/AdriensFunctions.py':
-        mypath = '/Users/adrienbabet/Documents/490R/Walking C3D files/'
-    elif str(__file__) == 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code\\AdriensFunctions.py':
-        mypath = 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/'
-    return mypath
+    abpcpath = ('c:\\Users\\goper\\Files\\vsCode\\490R\\VScodeIMUrepo', 'C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
+    abmacpath = ('/Users/adrienbabet/Documents/490R/IMU_gait_analysis', '/Users/adrienbabet/Documents/490R/Walking C3D files/')
+    tmpcpath = ('C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code', 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/')
+    pathfinder = dict([abpcpath, abmacpath, tmpcpath])
+    for path in pathfinder.keys():
+        if path in str(__file__):
+            return(pathfinder[path])
+        else:
+            print('adrienC3Dpath() did not find a path')
 
 
 def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
@@ -172,7 +174,7 @@ def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     return df
 
 
-def kalman(
+def simplekalman(
     measurments, initial_state=0, initial_error_covariance=6, state_transition=1.03,
     measurement_model=1, process_noise=0, measurement_covariance=1
 ):
@@ -208,11 +210,11 @@ def kalman(
     filtered_data = []
     # kalman algorithm
     for z in measurments:
-        xp = A * x                              # predict state
-        Pp = A * P * At + Q                     # predict error cov
-        K = Pp * Ht * (1/(H * Pp * Ht + R))     # calculate gain
-        x = xp + K * (z - H * xp)               # calculate state estimate
-        P = Pp - K * H * Pp                     # calculate error cov
+        xp = A * x                              # state prediction
+        Pp = A * P * At + Q                     # covariance prediction
+        K = Pp * Ht / (H * Pp * Ht + R)         # kalman gain
+        x = xp + K * (z - H * xp)               # state update
+        P = Pp - K * H * Pp                     # covariance update
         filtered_data.append(x)
     return filtered_data
 
