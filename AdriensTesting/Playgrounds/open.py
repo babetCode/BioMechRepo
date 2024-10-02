@@ -18,9 +18,13 @@ def adrienC3Dpath():
     for path in pathfinder.keys():
         if path in str(__file__):
             return(pathfinder[path])
+<<<<<<< HEAD
         else:
             print('adrienC3Dpath() did not find a path')
 
+=======
+            break
+>>>>>>> ebb9181b1f87b36585c8d49b6244f8cb027bd721
 
 print(adrienC3Dpath())
 
