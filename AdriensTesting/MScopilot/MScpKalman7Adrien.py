@@ -58,7 +58,7 @@ class QuaternionKalmanFilter:
         return self.q
 
 # Import the necessary functions and classes from AdriensFunctions.py
-from imufunctions import adrienC3Dpath, c3d_analogs_df, imu
+from imufunctions import adrien_c3d_path, c3d_analogs_df, imu
 
 def animate_imu_rotation(kf, all_data, animation_speed=1.0):
     fig = plt.figure()
@@ -117,7 +117,7 @@ def main():
     measurement_noise = 1e-3
 
     kf = QuaternionKalmanFilter(dt, process_noise, measurement_noise)
-    mypath = adrienC3Dpath()
+    mypath = adrien_c3d_path()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
     myIMU = imu('myFirstIMU', df, 9)
 

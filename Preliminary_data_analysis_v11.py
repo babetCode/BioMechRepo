@@ -51,7 +51,7 @@ filename = (
     p + "_C3D/" + p + "_" + speed + "_" + trial + ".c3d"
 )  # name of file corresponding to the trial to be analyzed
 path = (
-    "C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/"
+    'C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/'
 )
 filepath = path + filename  # resulting file path
 

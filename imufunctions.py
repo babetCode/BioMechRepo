@@ -53,14 +53,14 @@ def rotateQuaternion(point, axis, angle: float):
     Rotated Point (list)
         [point x, point y, point z].
     """
-    normalizedAxis = axis/np.linalg.norm(axis)
+    normalizedaxis = axis/np.linalg.norm(axis)
     q_inv = [cos(angle/2)]
     q = [cos(angle/2)]
-    for value in normalizedAxis:
+    for value in normalizedaxis:
         q.append(sin(angle/2)*value)
         q_inv.append(-sin(angle/2)*value)
-    pointQuat = [0, point[0], point[1], point[2]]
-    rotation = quaternion_multiply(quaternion_multiply(q, pointQuat), q_inv)
+    pointquat = [0, point[0], point[1], point[2]]
+    rotation = quaternion_multiply(quaternion_multiply(q, pointquat), q_inv)
     result = [float(i) for i in rotation[1:]]
     return(result)
 
@@ -122,7 +122,7 @@ def plot3axes(figure):
     figure.plot((0,0), (0,0), (-1.3,1.3), label='z')
 
 
-def adrienC3Dpath():
+def adrien_c3d_path():
     """
     Gets directory path for C3D files on Adriens computers.
 
@@ -272,6 +272,9 @@ class imu:
         self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
         self.frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
 
+    def __str__(self):
+        return f'{self.name}'
+
     def raw_orientation(self):
         xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(self.frames)]) # xyz_axes[frame, axis, xyz vector]
         [xaxis, yaxis, zaxis] = [xyz_axes[0][i] for i in range(3)]
@@ -316,7 +319,7 @@ class imu:
 
 
 def main():
-    mypath = adrienC3Dpath()
+    mypath = adrien_c3d_path()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
     myIMU = imu('myFirstIMU', df, 9)
     imu_data = myIMU.all_data
