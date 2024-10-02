@@ -72,7 +72,7 @@ def animate_imu_rotation(kf, all_data, animation_speed=1.0):
     ax.set_zlabel('Z')
 
     # Load the 3D model and scale it down
-    imu_mesh = mesh.Mesh.from_file('house.stl')
+    imu_mesh = mesh.Mesh.from_file('AdriensTesting/3dModels/house.stl')
     imu_mesh.vectors /= 10.0  # Scale down the model by a factor of 10
 
     # Create a Poly3DCollection with lighting enabled
@@ -117,7 +117,6 @@ def main():
     measurement_noise = 1e-3
 
     kf = QuaternionKalmanFilter(dt, process_noise, measurement_noise)
-
     mypath = adrienC3Dpath()
     df = c3d_analogs_df('C07', 'Fast', '07', mypath)
     myIMU = imu('myFirstIMU', df, 9)
