@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, 'c:/Users/goper/Files/vsCode/490R/VScodeIMUrepo')
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
