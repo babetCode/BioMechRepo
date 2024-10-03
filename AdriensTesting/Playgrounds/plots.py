@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, 'c:/Users/goper/Files/vsCode/490R/VScodeIMUrepo')
+import adrienscomputers
+adrienscomputers.adriensdirectory()
 from imufunctions import*
 
 mypath = adrien_c3d_path()

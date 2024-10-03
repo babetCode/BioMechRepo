@@ -1,8 +1,7 @@
-import sys
-import numpy as np
-import plotly.graph_objects as go
-sys.path.insert(0, 'c:/Users/goper/Files/vsCode/490R/VScodeIMUrepo')
+import adrienscomputers
+adrienscomputers.adriensdirectory()
 from imufunctions import*
+import plotly.graph_objects as go
 
 # Load data
 mypath = adrien_c3d_path()
