@@ -138,8 +138,7 @@ def adrien_c3d_path():
     for path in pathfinder.keys():
         if path in str(__file__).replace('\\', '/'):
             return(pathfinder[path])
-        else:
-            print('adrienC3Dpath() did not find a path')
+    print('adrienC3Dpath() did not find a path')
 
 
 def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
