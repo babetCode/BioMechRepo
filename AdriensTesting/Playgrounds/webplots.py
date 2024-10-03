@@ -20,6 +20,11 @@ def getimus():
 imus = getimus()
 tobeplotted = [i+1 for i in range(11)]
 
+for i, pry in enumerate(['pitch', 'roll', 'yaw']):
+    print(pry)
+    for j in range(11):
+        print(f'{imus[j].acc_data.iloc[i].mean()} {imus[j]}')
+
 # Create a Plotly figure
 fig = go.Figure()
 
@@ -29,7 +34,7 @@ for i in tobeplotted:
         fig.add_trace(go.Scatter(
             y=9 * imus[i-1].acc_data.iloc[j],
             mode='lines',
-            name=f'{imus[i-1]} ACC {pry}'
+            name=f'{imus[i-1]}ACC{pry}'
         ))
 
 # Plot gravity line
