@@ -1,15 +1,20 @@
+#get imufunctions
 from adriensdir import BioMechDir
-mydir = BioMechDir().getimufunctions()
+mydir = BioMechDir().add_imu_func_path()
 from imufunctions import *
-print(mydir)
-my3dplot = plt.figure().add_subplot(projection='3d')
 
-my3dplot.set_xlabel('x')
+c3dpath = adrien_c3d_path(mydir)
 
-my3dplot.set_ylabel('y')
+print(c3dpath)
 
-my3dplot.set_zlabel('z')
+# my3dplot = plt.figure().add_subplot(projection='3d')
 
-plot3axes(my3dplot)
+# my3dplot.set_xlabel('x')
 
-plt.show()
+# my3dplot.set_ylabel('y')
+
+# my3dplot.set_zlabel('z')
+
+# plot3axes(my3dplot)
+
+# plt.show()
