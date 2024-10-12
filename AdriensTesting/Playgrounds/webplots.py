@@ -1,5 +1,5 @@
-import adrienscomputers
-adrienscomputers.adriensdirectory()
+import AdriensTesting.Playgrounds.adriensdir as adriensdir
+adriensdir.adriensdirectory()
 from imufunctions import*
 import plotly.graph_objects as go
 

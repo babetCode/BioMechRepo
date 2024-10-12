@@ -1,5 +1,5 @@
-import adrienscomputers
-adrienscomputers.adriensdirectory()
+import AdriensTesting.Playgrounds.adriensdir as adriensdir
+adriensdir.adriensdirectory()
 from imufunctions import*
 
 mypath = adrien_c3d_path()

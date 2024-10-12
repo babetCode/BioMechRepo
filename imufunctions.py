@@ -122,7 +122,7 @@ def plot3axes(figure):
     figure.plot((0,0), (0,0), (-1.3,1.3), label='z')
 
 
-def adrien_c3d_path():
+def adrien_c3d_path(machine):
     """
     Gets directory path for C3D files on Adriens computers.
 
@@ -131,14 +131,14 @@ def adrien_c3d_path():
     mypath: str
         My file path.
     """
-    abpcpath = ('c:/Users/goper/Files/vsCode/490R/VScodeIMUrepo', 'C:/Users/goper/Files/vsCode/490R/Walking_C3D_files/')
-    abmacpath = ('/Users/adrienbabet/Documents/490R/IMU_gait_analysis', '/Users/adrienbabet/Documents/490R/Walking C3D files/')
-    tmpcpath = ('C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Python_code', 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Walking_mechanics/Data/')
-    pathfinder = dict([abpcpath, abmacpath, tmpcpath])
-    for path in pathfinder.keys():
-        if path in str(__file__).replace('\\', '/'):
-            return(pathfinder[path])
-    print('adrienC3Dpath() did not find a path')
+    path2c3d = {'abpc': 'c:/Users/goper/Files/vsCode/490R',
+        'abmac': '/Users/adrienbabet/Documents/vsCode/490R',
+        'tmlaptop': 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Python_code'}
+    if machine in path2c3d:
+        return(path2c3d[machine])
+    else:
+        print('adrienC3Dpath() did not find a path')
+        break
 
 
 def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
