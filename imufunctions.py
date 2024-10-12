@@ -5,6 +5,7 @@ from math import *
 from ezc3d import c3d
 import matplotlib.pyplot as plt
 import pandas as pd
+import glob
 
 
 def quaternion_multiply(q1, q2):
@@ -122,7 +123,7 @@ def plot3axes(figure):
     figure.plot((0,0), (0,0), (-1.3,1.3), label='z')
 
 
-def adrien_c3d_path(machine):
+def adrien_c3d_folder(machine):
     """
     Gets directory path for C3D files on Adriens computers.
 
@@ -140,6 +141,10 @@ def adrien_c3d_path(machine):
         print('adrien_c3d_path() did not find a path')
         return('adrien_c3d_path() did not find a path')
 
+
+def c3d_file(participant: str, speed: str, trial: str, path: str):
+    filename = participant+'_C3D\\'+participant+'_'+speed+'_'+trial+'.c3d'
+    return(path+filename)
 
 def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     """
@@ -161,8 +166,7 @@ def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     df: dataframe
         dataframe containing trial data.
     """
-    filename = participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d'
-    myc3d = c3d(path+filename)
+    myc3d = c3d(path)
     #point_data = myc3d['data']['points']
     analog_data = myc3d['data']['analogs']
     analogs = analog_data[0, :, :]
