@@ -9,6 +9,7 @@ class BioMechDir:
             if key in str(__file__).replace('\\', '/'):
                 self.machine = pathfinder[key]
                 break
+
     def __str__(self):
         return f'{self.machine}'
     
@@ -20,39 +21,21 @@ class BioMechDir:
         print(f'added "{path2functions[self.machine]}" to sys path')
         print('ready to import imufunctions')      
 
-myDir = BioMechDir()
+# myDir = BioMechDir()
 
-myDir.getmyfunctions()
+# myDir.getmyfunctions()
 
-import matplotlib.pyplot as plt
-from imufunctions import *
+# from imufunctions import *
 
-my3dplot = plt.figure().add_subplot(projection='3d')
+# my3dplot = plt.figure().add_subplot(projection='3d')
 
-my3dplot.set_xlabel('x')
+# my3dplot.set_xlabel('x')
 
-my3dplot.set_ylabel('y')
+# my3dplot.set_ylabel('y')
 
-my3dplot.set_zlabel('z')
+# my3dplot.set_zlabel('z')
 
-plot3axes(my3dplot)
+# plot3axes(my3dplot)
 
-plt.show()
+# plt.show()
 
-# def adriensdirectory:
-#     """
-#     adds directory path for imufunctions on Adriens computers.
-
-#     """
-#     abpcpath = 'c:/Users/goper/Files/vsCode/490R/BioMechRepo'
-#     abmacpath = '/Users/adrienbabet/Documents/vsCode/490R/BioMechRepo'
-#     tmpcpath = 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Python_code'
-#     pathfinder = [abpcpath, abmacpath, tmpcpath]
-#     for path in pathfinder:
-#         if path in str(__file__).replace('\\', '/'):
-#             sys.path.insert(0, f'{path}')
-#             break
-
-# adriensdirectory()
-
-# import imufunctions
