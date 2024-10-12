@@ -137,8 +137,8 @@ def adrien_c3d_path(machine):
     if machine in path2c3d:
         return(path2c3d[machine])
     else:
-        print('adrienC3Dpath() did not find a path')
-        break
+        print('adrien_c3d_path() did not find a path')
+        return('adrien_c3d_path() did not find a path')
 
 
 def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):

@@ -1,7 +1,7 @@
 import sys
 
-class adriensBioMechDir:
-    def __init__(self, foo):
+class BioMechDir:
+    def __init__(self):
         pathfinder = {'c:/Users/goper/Files/vsCode': 'abpc',
                       '/Users/adrienbabet/Documents/vsCode': 'abmac',
                       'C:/Users/tm4dd/Documents': 'tmlaptop'}
@@ -20,9 +20,24 @@ class adriensBioMechDir:
         print(f'added "{path2functions[self.machine]}" to sys path')
         print('ready to import imufunctions')      
 
-import imufunctions
-print('import succesful')
-mydir = imu(1,1,1)
+myDir = BioMechDir()
+
+myDir.getmyfunctions()
+
+import matplotlib.pyplot as plt
+from imufunctions import *
+
+my3dplot = plt.figure().add_subplot(projection='3d')
+
+my3dplot.set_xlabel('x')
+
+my3dplot.set_ylabel('y')
+
+my3dplot.set_zlabel('z')
+
+plot3axes(my3dplot)
+
+plt.show()
 
 # def adriensdirectory:
 #     """
