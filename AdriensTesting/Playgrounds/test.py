@@ -3,9 +3,9 @@ from adriensdir import BioMechDir
 mydir = BioMechDir().add_imu_func_path()
 from imufunctions import *
 
-c3dpath = adrien_c3d_path(mydir)
+df = c3d_analogs_df('C07', 'Fast', '07', adrien_c3d_path(mydir))
 
-print(c3dpath)
+print(df)
 
 # my3dplot = plt.figure().add_subplot(projection='3d')
 

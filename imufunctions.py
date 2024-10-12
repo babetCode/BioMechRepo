@@ -131,9 +131,9 @@ def adrien_c3d_path(machine):
     mypath: str
         My file path.
     """
-    path2c3d = {'abpc': 'c:/Users/goper/Files/vsCode/490R',
-        'abmac': '/Users/adrienbabet/Documents/vsCode/490R',
-        'tmlaptop': 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/Python_code'}
+    path2c3d = {'abpc': 'c:\\Users\\goper\\Files\\vsCode\\490R\\c3d_files\\',
+        'abmac': '\\Users\\adrienbabet\\Documents\\vsCode\\490R\\c3d_files\\',
+        'tmlaptop': 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code\\'}
     if machine in path2c3d:
         return(path2c3d[machine])
     else:
@@ -161,11 +161,9 @@ def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     df: dataframe
         dataframe containing trial data.
     """
-    filename = (
-        participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d')
-    file_path = path+filename
-    myc3d = c3d(file_path)
-    point_data = myc3d['data']['points']
+    filename = participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d'
+    myc3d = c3d(path+filename)
+    #point_data = myc3d['data']['points']
     analog_data = myc3d['data']['analogs']
     analogs = analog_data[0, :, :]
     analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
