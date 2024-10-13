@@ -1,11 +1,18 @@
-"this is a drafting space for functions to be used in IMU gait analysis"
-
+"""
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+Functions for biomechanical data analysis                              |
+_______________________________________________________________________|
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+Author: Adrien Babet    GitHub: @babetcode    Email: adrienbabet1@gmail.com   |
+______________________________________________________________________________|
+"""
 import numpy as np
-from math import *
+import math
 from ezc3d import c3d
 import matplotlib.pyplot as plt
 import pandas as pd
 import glob
+import os
 
 
 def quaternion_multiply(q1, q2):
@@ -35,17 +42,18 @@ def quaternion_multiply(q1, q2):
     ])
 
 
-def rotateQuaternion(point, axis, angle: float):
+def rotate_quaternion(point, axis, angle: float):
     """
-    Rotates 'point' around the 'axis' through origin by the 'angle' (in radians).
+    Rotates 'point' around the 'axis' through origin by the 'angle'
+    (in radians).
 
     Parameters
     -
     point (3 item iterable)
         Point as [point x, point y, point z].
     axis (3 item iterable)
-        axis as [axis x, axis y, axis z].
-        The rotation will be around the line through this point and [0, 0, 0].
+        axis as [axis x, axis y, axis z]. The rotation will be around
+        the line through this point and [0, 0, 0].
     angle (float)
         angle in radians.
 
@@ -55,11 +63,11 @@ def rotateQuaternion(point, axis, angle: float):
         [point x, point y, point z].
     """
     normalizedaxis = axis/np.linalg.norm(axis)
-    q_inv = [cos(angle/2)]
-    q = [cos(angle/2)]
+    q_inv = [math.cos(angle/2)]
+    q = [math.cos(angle/2)]
     for value in normalizedaxis:
-        q.append(sin(angle/2)*value)
-        q_inv.append(-sin(angle/2)*value)
+        q.append(math.sin(angle/2)*value)
+        q_inv.append(-math.sin(angle/2)*value)
     pointquat = [0, point[0], point[1], point[2]]
     rotation = quaternion_multiply(quaternion_multiply(q, pointquat), q_inv)
     result = [float(i) for i in rotation[1:]]
@@ -68,14 +76,17 @@ def rotateQuaternion(point, axis, angle: float):
 
 def plot_rotation(point, axis, angle, figure, name):
     """
-    Plots the path a point takes while rotating with rotateQuaternion() function on the 'ax' figure. Returns rotatedQuaternion(point, angle, axis).
+    Plots the path a point takes while rotating with rotateQuaternion()
+    function on the 'ax' figure. Returns rotatedQuaternion(point, angle,
+    axis).
 
     Parameters
     -
     point (3 item iterable)
         Point as [point x, point y, point z].
     axis (3 item iterable)
-        axis as [axis x, axis y, axis z]. The rotation will be around the line through this point and [0, 0, 0].
+        axis as [axis x, axis y, axis z]. The rotation will be around
+        the line through this point and [0, 0, 0].
     angle (float)
         angle in radians.
     figure: pyplot figure
@@ -96,17 +107,18 @@ def plot_rotation(point, axis, angle, figure, name):
     y = np.zeros(100)
     z = np.zeros(100)
     for i in range(100):
-        p = rotateQuaternion(point, t[i], axis)
+        p = rotate_quaternion(point, t[i], axis)
         x[i] = p[0]
         y[i] = p[1]
         z[i] = p[2]
     figure.plot(x, y, z, label=name)
-    return(rotateQuaternion(point, angle, axis))
+    return(rotate_quaternion(point, angle, axis))
 
 
 def plot3axes(figure):
     """
-    Plots the x, y, and z axes on the 'ax' figure. Does not include plt.show()
+    Plots the x, y, and z axes on the 'ax' figure. Does not include
+    plt.show()
 
     Parameters
     -
@@ -134,7 +146,8 @@ def adrien_c3d_folder(machine):
     """
     path2c3d = {'abpc': 'c:\\Users\\goper\\Files\\vsCode\\490R\\c3d_files\\',
         'abmac': '\\Users\\adrienbabet\\Documents\\vsCode\\490R\\c3d_files\\',
-        'tmlaptop': 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\Python_code\\'}
+        'tmlaptop': 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\\
+        Python_code\\'}
     if machine in path2c3d:
         return(path2c3d[machine])
     else:
@@ -146,7 +159,7 @@ def c3d_file(participant: str, speed: str, trial: str, path: str):
     filename = participant+'_C3D\\'+participant+'_'+speed+'_'+trial+'.c3d'
     return(path+filename)
 
-def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
+def c3d_analogs_df(path: str):
     """
     Returns pandas dataframe with IMU data.
 
@@ -159,7 +172,8 @@ def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     trial: str
         trial number as string.
     path: str
-        directory path as string. If you have set it up, using adrienC3Dpath() is reccomended.
+        directory path as string. If you have set it up, using
+        adrien_c3d_folder() is reccomended.
 
     Returns
     -
@@ -175,10 +189,111 @@ def c3d_analogs_df(participant: str, speed: str, trial: str, path: str):
     return df
 
 
-def simplekalman(
-    measurments, initial_state=0, initial_error_covariance=6, state_transition=1.03,
-    measurement_model=1, process_noise=0, measurement_covariance=1
-):
+def write_trc_file(marker_data, labels, frame_rate, units, output_file):
+    """
+    Writes marker data to a .trc file compatible with OpenSim.
+    """
+    marker_data = np.nan_to_num(marker_data, nan=0.0)
+
+    num_markers = marker_data.shape[1]
+    num_frames = marker_data.shape[0]
+
+    with open(output_file, 'w') as f:
+        # Write header
+        f.write('PathFileType\t4\t(X/Y/Z)\t{}\n'.format(output_file))
+        f.write('DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits\
+                \tOrigDataRate\tOrigDataStartFrame\tOrigNumFrames\n'
+                )
+        f.write('{:.2f}\t{:.2f}\t{}\t{}\t{}\t{}\t1\t{}\n\
+                '.format(frame_rate, frame_rate, num_frames, num_markers,
+                         units, frame_rate, num_frames)
+                )
+        
+        # Write marker labels
+        f.write('Frame#\tTime\t' + '\t'.join(
+            [f'{label}\t\t' for label in labels]) + '\n')
+        f.write('\t\t' + '\t'.join(
+            [f'X{i+1}\tY{i+1}\tZ{i+1}' for i in range(len(labels))]) + '\n')
+        f.write('\n')  # Empty line separating header and data
+
+        # Write data
+        for i in range(num_frames):
+            time = i / frame_rate
+            frame_data = marker_data[i].reshape(-1)
+            f.write(f'{i+1}\t{time:.5f}\t' + '\t'.join(
+                [f'{x:.5f}' for x in frame_data]) + '\n')
+
+def write_mot_file(analog_data, labels, frame_rate, output_file):
+    """
+    Writes analog data (forces, joint angles, etc.) to a .mot file
+    compatible with OpenSim.
+    """
+    num_columns = analog_data.shape[1]
+    num_frames = analog_data.shape[0]
+    
+    with open(output_file, 'w') as f:
+        # Write header
+        f.write('name {}\n'.format(output_file))
+        f.write('datacolumns {}\n'.format(num_columns))
+        f.write('datarows {}\n'.format(num_frames))
+        f.write('range 0 {:.5f}\n'.format(num_frames / frame_rate))
+        f.write('endheader\n')
+
+        # Write column headers
+        f.write('time\t' + '\t'.join(labels) + '\n')
+        
+        # Write data
+        for i in range(num_frames):
+            time = i / frame_rate
+            frame_data = analog_data[i]
+            f.write(f'{time:.5f}\t' + '\t'.join(
+                [f'{x:.5f}' for x in frame_data]) + '\n')
+
+def convert_c3d_to_opensim(c3d_file: str, trc_file: str, mot_file: str):
+    """
+    Writes data to .trc and .mot files compatible with OpenSim.
+
+    Parameters
+    -
+    c3d_file: str
+        File path to c3d.
+    trc_file: str
+        File path for the ouput .trc file.
+    mot_file: str
+        File path for the ouput .mot file.
+    """
+    myc3d = c3d(c3d_file)
+    
+    # Reshape to (n_frames, n_markers, 3)
+    # Native shape: (4, n_markers, n_frames)
+    marker_data = myc3d['data']['points'] 
+    marker_data = marker_data[[0, 2, 1], :, :].transpose(2, 1, 0) 
+
+    marker_labels = myc3d['parameters']['POINT']['LABELS']['value']
+
+    frame_rate = myc3d['parameters']['POINT']['RATE']['value'][0]
+
+    units = myc3d['parameters']['POINT']['UNITS']['value'][0]
+    
+    # Write marker data to .trc file
+    write_trc_file(marker_data, marker_labels, frame_rate, units, trc_file)
+
+    # Extract analog data (optional, for motion data if available)
+    if 'ANALOG' in myc3d['parameters']:
+        analog_data = np.array(myc3d['data']['analogs']).squeeze().T
+        analog_labels = myc3d['parameters']['ANALOG']['LABELS']['value']
+        
+        # Write analog data to .mot file
+        write_mot_file(analog_data, analog_labels, frame_rate, mot_file)
+    else:
+        print("No analog data found in the .c3d file. \
+              Skipping .mot file creation.")
+
+
+
+def simplekalman(measurments, initial_state=0, initial_error_covariance=6,
+                 state_transition=1.03, measurement_model=1, process_noise=0,
+                 measurement_covariance=1):
     """
     A simple kalman filter.
 
@@ -191,7 +306,8 @@ def simplekalman(
     trial: str
         trial number as string.
     path: str
-        directory path as string. If you have set it up, using adrienC3Dpath() is reccomended.
+        directory path as string. If you have set it up, using
+        adrien_c3d_folder() is reccomended.
 
     Returns
     -
@@ -222,14 +338,16 @@ def simplekalman(
 
 class imu:
     """
-    Contains data structure and functionality for analyzing IMU measurements.
+    Contains data structure and functionality for analyzing IMU
+    measurements.
 
     Parameters
     -
     name: string
         Name for the IMU.
     df: dataframe
-        dataframe containing IMU measurements. Using c3d_analogs_df() is reccomended.
+        dataframe containing IMU measurements. Using c3d_analogs_df() is
+        reccomended.
     sensor_num: any
         Sensor nubmer will be converted to string to index data from df.
 
@@ -263,21 +381,31 @@ class imu:
     def __init__(self, name, df, sensor_num):
         self.name = name
         self.indices = [row for row in df.index] # list of analog labels
-        self.start_row_index = self.indices.index('DelsysTrignoBase 1: Sensor '+str(sensor_num)+'IM ACC Pitch') # find first row label
-        self.all_data = df.iloc[self.start_row_index : self.start_row_index+6] # get dataframe of the 6 rows
+        # find first row label
+        self.start_row_index = self.indices.index(
+            'DelsysTrignoBase 1: Sensor '+str(sensor_num)+'IM ACC Pitch')
+        # get dataframe of the 6 rows
+        self.all_data = df.iloc[self.start_row_index : self.start_row_index+6]
         
-        self.acc_data = self.all_data.iloc[0:3] # get the first 3 rows of acc data
-        sqrt_acc = np.square(self.acc_data) # square of all acc data
-        net_acc_sq = sqrt_acc.apply(np.sum, axis=0, raw=True) # sum of P,R,Y acc squares for each frame
+        # get the first 3 rows of acc data
+        self.acc_data = self.all_data.iloc[0:3]
+        # square of all acc data
+        sqrt_acc = np.square(self.acc_data)
+        # sum of P,R,Y acc squares for each frame
+        net_acc_sq = sqrt_acc.apply(np.sum, axis=0, raw=True)
         self.net_acc = np.sqrt(net_acc_sq) # net acc for each frame
-        self.gyr_data = self.all_data.iloc[3:7] # get the next three rows of gyr data
-        self.frames = len(self.gyr_data.columns) # get number of frames (same as legth of rows)
+        # get the next three rows of gyr data
+        self.gyr_data = self.all_data.iloc[3:7]
+        # get number of frames (same as legth of rows)
+        self.frames = len(self.gyr_data.columns)
 
     def __str__(self):
         return f'{self.name}'
 
     def raw_orientation(self):
-        xyz_axes = np.array([[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(self.frames)]) # xyz_axes[frame, axis, xyz vector]
+        xyz_axes = np.array(
+            [[[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]] for i in range(self.frames)]
+            ) # xyz_axes[frame, axis, xyz vector]
         [xaxis, yaxis, zaxis] = [xyz_axes[0][i] for i in range(3)]
 
         # print([i for i in self.gyr_data.iloc[:,0]]) # first column
@@ -292,15 +420,17 @@ class imu:
 
         for i in range (self.frames):
             # print('loop # '+str(i))
-            gyr = np.array(self.gyr_data.iloc[:, i-1]) # get gyr date for previous frame
+            # get gyr date for previous frame
+            gyr = np.array(self.gyr_data.iloc[:, i-1])
             initial_axes = xyz_axes[i-1,:,:] # get axes for previous frame
-            scaled_axes = [initial_axes[j] * gyr[j] for j in range(3)] # scale axes by component rotation velocity
+            # scale axes by component rotation velocity
+            scaled_axes = [initial_axes[j] * gyr[j] for j in range(3)]
             total_axis = np.sum(scaled_axes, axis=0) # axis of rotation
-            # norm_axis = total_axis/np.linalg.norm(total_axis) # normalized axis - NOT NECESSARY AS rotateQuaternion() already does this
-            norm_gyr = sqrt(np.sum(np.square(gyr))) # rotational velocity
+            norm_gyr = math.sqrt(np.sum(np.square(gyr))) # rotational velocity
             angle_deg = norm_gyr/148
-            angle_rad = angle_deg * pi/180 
-            rotated_axes = np.array([rotateQuaternion(axisvector, angle_rad, total_axis) for axisvector in initial_axes])
+            angle_rad = angle_deg * math.pi/180 
+            rotated_axes = np.array([rotate_quaternion(axisvector, angle_rad,
+                total_axis) for axisvector in initial_axes])
             #print(rotated_axes)
             xyz_axes[i,:,:] = rotated_axes
         my3dplot.plot(xyz_axes[:,0,0], xyz_axes[:,0,1], xyz_axes[:,0,2])
@@ -320,10 +450,7 @@ class imu:
 
 
 def main():
-    mypath = adrien_c3d_path()
-    df = c3d_analogs_df('C07', 'Fast', '07', mypath)
-    myIMU = imu('myFirstIMU', df, 9)
-    imu_data = myIMU.all_data
+    print('empty')
 
 if __name__ == '__main__':
     main()

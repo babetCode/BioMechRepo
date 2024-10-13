@@ -1,21 +1,24 @@
 """
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
-Read c3d Files                                                         |
+Convert c3d files to .trc and .mot for OpenSim                         |
 _______________________________________________________________________|
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
 Author: Adrien Babet    GitHub: @babetcode    Email: adrienbabet1@gmail.com   |
 ______________________________________________________________________________|
 """
 
-# Add imufunctions.py dir path to the sys path before importing it.
+# Get imu functions
 from adriensdir import BioMechDir
 mydir = BioMechDir().add_imu_func_path()
 import imufunctions as myfns
 import ezc3d
 import numpy as np
 
+
+# Get C3D path
 c3d_fp = myfns.c3d_file('C07', 'Fast', '07', myfns.adrien_c3d_folder(mydir))
-myc3d = ezc3d.c3d(c3d_fp)
-point_data = myc3d['parameters']['POINT']['UNITS']['value']
-# point_data = myc3d['data']['points']
-print(point_data)
+
+trc_file = 'C:\\Users\\goper\\Files\\vsCode\\490R\\adaptedOsim\\output1.trc'
+mot_file = 'C:\\Users\\goper\\Files\\vsCode\\490R\\adaptedOsim\\output1.mot'
+
+myfns.convert_c3d_to_opensim(c3d_fp, trc_file, mot_file)
