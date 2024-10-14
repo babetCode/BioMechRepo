@@ -19,6 +19,6 @@ import numpy as np
 c3d_fp = myfns.c3d_file('C07', 'Fast', '07', myfns.adrien_c3d_folder(mydir))
 
 trc_file = 'C:\\Users\\goper\\Files\\vsCode\\490R\\adaptedOsim\\output1.trc'
-mot_file = 'C:\\Users\\goper\\Files\\vsCode\\490R\\adaptedOsim\\output1.mot'
+mot_file = 'C:\\Users\\goper\\Files\\vsCode\\490R\\adaptedOsim\\output1.sto'
 
 myfns.convert_c3d_to_opensim(c3d_fp, trc_file, mot_file)
