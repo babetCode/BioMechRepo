@@ -1,30 +1,52 @@
-# get imufunctions
+"""
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+Convert c3d files to .trc and .mot for OpenSim                                         
+________________________________________________________________________
+
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+Author: Adrien Babet | GitHub: @babetcode | Email: adrienbabet1@gmail.com  
+_______________________________________________________________________________
+"""
+
+# Get imu functions
 from adriensdir import BioMechDir
 mydir = BioMechDir().add_imu_func_path()
-from imufunctions import *
+import imufunctions as myfns
 import glob
-
-# participants = [filepath.rsplit('\\', 1)[-1][:3] for filepath in glob.glob(f'{adrien_c3d_path(mydir)}/*')]
-
-# print(participants)
+import pandas as pd
+import ezc3d
+import numpy as np
 
 pars = []
 
 tris = []
 
-for n, filepath in enumerate(glob.glob(f'{adrien_c3d_path(mydir)}/*')):
-    pars.append(filepath.rsplit('\\', 1)[-1])
-    tri = []
-    for folder in glob.glob(f'{filepath}/*'):
-        tri.append(folder.rsplit('\\', 1)[-1])
-    tris.append(tri)
+for n, par_folder_path in enumerate(glob.glob(f'{myfns.adrien_c3d_folder(mydir)}/*')):
+    participant = par_folder_path.rsplit('\\', 1)[-1][:3]
+    pars.append(participant)
+    session = []
+    for mocap_run in glob.glob(f'{par_folder_path}/*'):
+        run_id = mocap_run.rsplit('\\', 1)[-1].removesuffix('.c3d')[4:]
+        session.append(run_id)
+    tris.append(session)
 
-print(tris)
+maxlen = max(len(i) for i in tris)
+
+print(f'max len {maxlen}')
+
+for trial in tris:
+    if len(trial) < maxlen:
+        for i in range(maxlen - len(trial)):
+            trial.append('n/a')
 
 
+mydata = dict(zip(pars, tris))
 
-# participants = ['A0'+str(i+1) for i in range(6)]+['C0'+str(i) for i in range(3,9)]+['C10','C11','C12','C15','C17']
-# print(participants)
+df = pd.DataFrame(mydata)
+
+print(df)
+
+
 
 
 
