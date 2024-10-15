@@ -84,10 +84,10 @@ def adrien_c3d_folder(machine):
     mypath: str
         My file path.
     """
-    path2c3d = {'abpc': 'c:\\Users\\goper\\Files\\vsCode\\490R\\c3d_files\\',
-        'abmac': '\\Users\\adrienbabet\\Documents\\vsCode\\490R\\c3d_files\\',
-        'tmlaptop': 'C:\\Users\\tm4dd\\Documents\\00_MSU\\01_PhD_Research\\\
-        Python_code\\'}
+    path2c3d = {'abpc': 'c:/Users/goper/Files/vsCode/490R/c3d_files/',
+        'abmac': '/Users/adrienbabet/Documents/vsCode/490R/c3d_files/',
+        'tmlaptop': 'C:/Users/tm4dd/Documents/00_MSU/01_PhD_Research/\
+        Python_code/'}
     if machine in path2c3d:
         return(path2c3d[machine])
     else:
@@ -96,7 +96,7 @@ def adrien_c3d_folder(machine):
 
 
 def c3d_file(participant: str, speed: str, trial: str, path: str):
-    filename = participant+'_C3D\\'+participant+'_'+speed+'_'+trial+'.c3d'
+    filename = participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d'
     return(path+filename)
 
 
