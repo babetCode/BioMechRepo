@@ -19,7 +19,7 @@ import numpy as np
 
 pars = []
 
-tris = []
+#tris = []
 
 paths = []
 
@@ -33,17 +33,16 @@ for n, par_folder_path in enumerate(glob.glob(f'{myfns.adrien_c3d_folder(mydir)}
         run_id = mocap_run.rsplit('\\', 1)[-1].removesuffix('.c3d')[4:]
         session.append(run_id)
     paths.append(parpaths)
-    tris.append(session)
+    #tris.append(session)
 
-maxlen = max(len(i) for i in tris)
+maxlen = max(len(i) for i in paths)
 
-print(f'paths {len(paths)} tris {len(tris)}')
 print(f'{myfns.adrien_c3d_folder(mydir)}')
 
-for trial in tris:
-    if len(trial) < maxlen:
-        for i in range(maxlen - len(trial)):
-            trial.append('n/a')
+# for trial in tris:
+#     if len(trial) < maxlen:
+#         for i in range(maxlen - len(trial)):
+#             trial.append('n/a')
 
 for path in paths:
     if len(path) < maxlen:
@@ -51,10 +50,10 @@ for path in paths:
             path.append('n/a')
 
 
-mydata = dict(zip(pars, tris))
+# mydata = dict(zip(pars, tris))
 
 fulldata = dict(zip(pars, paths))
 
-df = pd.DataFrame(mydata)
+df = pd.DataFrame(fulldata)
 
-df.to_csv('C:\\Users\\goper\\Files\\vsCode\\490R\\mocaptrials.csv')
+print(df['C07'].iloc[5])
