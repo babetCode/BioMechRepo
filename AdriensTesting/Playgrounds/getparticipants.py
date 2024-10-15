@@ -55,6 +55,6 @@ mydata = dict(zip(pars, tris))
 
 fulldata = dict(zip(pars, paths))
 
-df = pd.DataFrame(fulldata)
+df = pd.DataFrame(mydata)
 
-df.to_csv('C:\\Users\\goper\\Files\\vsCode\\490R\\mocappaths.csv')
+df.to_csv('C:\\Users\\goper\\Files\\vsCode\\490R\\mocaptrials.csv')
