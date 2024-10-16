@@ -97,7 +97,11 @@ def adrien_c3d_folder(machine):
 
 def c3d_file(participant: str, speed: str, trial: str, path: str):
     filename = participant+'_C3D/'+participant+'_'+speed+'_'+trial+'.c3d'
-    return(path+filename)
+    fp = path+filename
+    if os.path.exists(fp):
+        return fp
+    else:
+        return f'c3d_file() did not find "{fp}"'
 
 
 def c3d_analogs_df(path: str):

@@ -19,41 +19,45 @@ import numpy as np
 
 pars = []
 
-#tris = []
+tris = []
 
 paths = []
 
-for n, par_folder_path in enumerate(glob.glob(f'{myfns.adrien_c3d_folder(mydir)}\\*')):
-    participant = par_folder_path.rsplit('\\', 1)[-1][:3]
+for n, par_folder_path in enumerate(glob.glob(f'{myfns.adrien_c3d_folder(mydir)}/*')):
+    participant = par_folder_path.rsplit('/', 1)[-1][:3]
     pars.append(participant)
     session = []
     parpaths = []
     for mocap_run in glob.glob(f'{par_folder_path}/*'):
-        parpaths.append(mocap_run.replace('\\','/'))
-        run_id = mocap_run.rsplit('\\', 1)[-1].removesuffix('.c3d')[4:]
+        parpaths.append(mocap_run.replace('/','/'))
+        run_id = mocap_run.rsplit('/', 1)[-1].removesuffix('.c3d')[4:]
         session.append(run_id)
     paths.append(parpaths)
-    #tris.append(session)
+    tris.append(session)
 
-maxlen = max(len(i) for i in paths)
+maxlen = max(len(i) for i in tris)
 
 print(f'{myfns.adrien_c3d_folder(mydir)}')
 
-# for trial in tris:
-#     if len(trial) < maxlen:
-#         for i in range(maxlen - len(trial)):
-#             trial.append('n/a')
+for trial in tris:
+    trial.sort()
+    if len(trial) < maxlen:
+        for i in range(maxlen - len(trial)):
+            trial.append('n/a')
 
-for path in paths:
-    if len(path) < maxlen:
-        for i in range(maxlen - len(path)):
-            path.append('n/a')
+# for path in paths:
+#     if len(path) < maxlen:
+#         for i in range(maxlen - len(path)):
+#             path.append('n/a')
 
 
-# mydata = dict(zip(pars, tris))
+mydata = dict(zip(pars, tris))
 
-fulldata = dict(zip(pars, paths))
+# fulldata = dict(zip(pars, paths))
 
-df = pd.DataFrame(fulldata)
+df = pd.DataFrame(mydata)
 
-print(df['C07'].iloc[5])
+df = df.sort_index(axis=1)
+
+df.to_csv('/Users/adrienbabet/Documents/vsCode/490R/sortedtrials.csv')
+print('made csv')

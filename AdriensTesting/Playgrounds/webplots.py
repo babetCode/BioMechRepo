@@ -1,11 +1,24 @@
-import AdriensTesting.Playgrounds.adriensdir as adriensdir
-adriensdir.adriensdirectory()
-from imufunctions import*
+"""
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+Plotly Playground
+________________________________________________________________________
+
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+Author: Adrien Babet | GitHub: @babetcode | Email: adrienbabet1@gmail.com
+_______________________________________________________________________________
+"""
+
+# Get imu functions
+from adriensdir import BioMechDir
+mydir = BioMechDir().add_imu_func_path()
+import imufunctions as myfns
+import ezc3d
+import numpy as np
 import plotly.graph_objects as go
 
 # Load data
-mypath = adrien_c3d_path()
-df = c3d_analogs_df('C07', 'Fast', '07', mypath)
+c3d_fp = myfns.c3d_file('C07', 'Fast', '07', myfns.adrien_c3d_folder(mydir))
+df = myfns.c3d_analogs_df(c3d_fp)
 
 # Function to get IMU data
 def getimus():
