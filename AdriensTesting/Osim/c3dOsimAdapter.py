@@ -24,4 +24,6 @@ print(ezc3d.c3d(c3d_fp))
 trc_file = '/Users/adrienbabet/Documents/vsCode/490R/output1.trc'
 sto_file = '/Users/adrienbabet/Documents/vsCode/490R/output1.sto'
 
-myfns.convert_c3d_to_opensim(c3d_fp, trc_file, sto_file)
+print(myfns.adrien_c3d_folder(mydir).removesuffix('c3d_files/')+'osim_files')
+
+#myfns.convert_c3d_to_opensim(c3d_fp, trc_file, sto_file)
