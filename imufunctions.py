@@ -233,8 +233,9 @@ def convert_c3d_to_opensim(c3d_file: str, trc_file: str, mot_file: str):
     
     # Reshape to (n_frames, n_markers, 3)
     # Native shape: (4, n_markers, n_frames)
-    marker_data = myc3d['data']['points'] 
-    marker_data = marker_data[[0, 2, 1], :, :].transpose(2, 1, 0) 
+    marker_data = myc3d['data']['points']
+    marker_data[0] *= -1
+    marker_data = marker_data[[0, 2, 1], :, :].transpose(2, 1, 0)
 
     marker_labels = myc3d['parameters']['POINT']['LABELS']['value']
 
