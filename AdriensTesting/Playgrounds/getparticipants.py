@@ -1,6 +1,8 @@
 """
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
-Convert c3d files to .trc and .mot for OpenSim                                         
+Make .csv chart of participants and their trials. Sends output file to
+path specified on line 65.
+Code Status: Functional
 ________________________________________________________________________
 
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
@@ -23,7 +25,8 @@ tris = []
 
 paths = []
 
-for n, par_folder_path in enumerate(glob.glob(f'{myfns.adrien_c3d_folder(mydir)}/*')):
+for n, par_folder_path in enumerate(
+    glob.glob(f'{myfns.adrien_c3d_folder(mydir)}/*')):
     participant = par_folder_path.rsplit('/', 1)[-1][:3]
     pars.append(participant)
     session = []

@@ -1,6 +1,9 @@
 """
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
-Convert c3d files to .trc and .mot for OpenSim                                         
+Itterate through files in 'c3d_files' folder and generate .trc and .mot
+files compatible with OpenSim. Output files are sent to 'open_sim' files
+folder in same directory as 'c3d_files'.
+Code Status: Functional
 ________________________________________________________________________
 
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
