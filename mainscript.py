@@ -9,13 +9,12 @@ Author: Adrien Babet | GitHub: @babetcode | Email: adrienbabet1@gmail.com
 _______________________________________________________________________________
 """
 
-from adriensdir import BioMechDir
-mydir = BioMechDir().add_imu_func_path()
 import imufunctions as myfns
 import numpy as np
 from filterpy.kalman import ExtendedKalmanFilter as EKF
 from filterpy.common import Q_discrete_white_noise
 from scipy.spatial.transform import Rotation as R
+
 
 def imu_ekf(data_set, data_rate):
     def quat_to_rotation_matrix(q):
@@ -59,9 +58,7 @@ def imu_ekf(data_set, data_rate):
         # Extract quaternion
         q_w, q_x, q_y, q_z = state[6:10]
         q = np.array([q_w, q_x, q_y, q_z])
-        
-        # Normalize the quaternion to avoid drift
-        q = q / np.linalg.norm(q)
+        q = q / np.linalg.norm(q) # Normalize to avoid drift
         
         # Update orientation (convert gyro to rad/sec first)
         omega = np.radians(gyro)
