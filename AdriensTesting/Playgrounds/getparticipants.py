@@ -62,5 +62,5 @@ df = pd.DataFrame(mydata)
 
 df = df.sort_index(axis=1)
 
-df.to_csv('/Users/adrienbabet/Documents/vsCode/490R/sortedtrials.csv')
+df.to_csv('sortedtrials.csv')
 print('made csv')
