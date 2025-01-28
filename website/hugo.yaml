@@ -1,5 +1,5 @@
 # Hugo configuration file
-title: KIN 325R
+title: Babet Bio Mech
 
 # import hextra as module
 module:
@@ -27,7 +27,7 @@ menu:
         type: search
     - name: GitHub
       weight: 3
-      url: "https://github.com/babetCode/kin325r.adrienbabet.com"
+      url: "https://github.com/babetCode/BioMechRepo"
       params:
         icon: github
 
@@ -48,4 +48,4 @@ params:
 
   editURL:
     enable: true
-    base: "https://github.com/babetCode/kin325r.adrienbabet.com/edit/main/content"
+    base: "https://github.com/babetCode/BioMechRepo/edit/main/website/content"
