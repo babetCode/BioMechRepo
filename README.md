@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4e27eebe-a071-4d81-a754-362c311e1ea1/deploy-status)](https://app.netlify.com/sites/capable-cupcake-cc5f85/deploys)
+
 # My Biomech Projects
 - IMU analysis
 
