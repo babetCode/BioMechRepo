@@ -1,0 +1,15 @@
+{{/* Shortcode to include a PDF file in a page with named parameters. */}}
+
+{{- $path := .Get "path" -}}
+{{- $height := .Get "height" | default "95" -}}
+{{- $url := partial "utils/file-path" (dict "page" .Page "path" $path) -}}
+
+<div class="hextra-pdf">
+  <button class="fullscreenBtn mx-auto px-2 m-1 bg-blue-400 hover:bg-blue-500 rounded-full flex items-center justify-center">
+    <i class="fas fa-expand"></i>
+    <span class="ml-2">Full Screen</span>
+  </button>
+  <iframe src="{{ $url | safeURL }}" width="100%" style="min-height: {{ $height }}vh;" frameborder="0"></iframe>
+</div>
+
+<script src="/js/full-screen.js"></script>

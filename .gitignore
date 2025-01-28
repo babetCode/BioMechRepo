@@ -162,3 +162,9 @@ cython_debug/
 #.idea/
 
 .DS_Store
+
+# Hugo output
+website/public/
+website/public/
+website/resources/
+website/.hugo_build.lock
