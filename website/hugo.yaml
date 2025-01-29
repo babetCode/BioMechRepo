@@ -1,5 +1,5 @@
 # Hugo configuration file
-title: Babet Bio Mech
+title: Babet IMU Project
 
 # import hextra as module
 module:
@@ -41,7 +41,6 @@ params:
       width: 40
       height: 40
 
-
   footer:
     displayCopyright: false
     displayPoweredBy: false
@@ -49,3 +48,6 @@ params:
   editURL:
     enable: true
     base: "https://github.com/babetCode/BioMechRepo/edit/main/website/content"
+
+  page:
+    width: full
