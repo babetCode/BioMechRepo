@@ -40,15 +40,15 @@ $$\begin{align*}
 
 Here, $\mathbf q_k^\text{world}$ is a vector representation of the quaternion $\left[q^0_k + i\left(q^1_k\right) + j\left(q^2_k\right) + k\left(q^3_k\right)\right]$. We use quaternions rather than matricies to represent orientation because they let us update our orientation much more easily using the quaternion update function
 $$
-\mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\begin{bmatrix}0 \\ \omega^{\text{N}}_k \\ \omega^{\text{E}}_k \\ \omega^{\text{D}}_k\end{bmatrix}.
+\mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\left[0 + i\left(\omega^{\text{N}}_k\right) + j\left(\omega^{\text{E}}_k\right) + k\left(\omega^{\text{D}}_k\right)\right].
 $$
 
-Putting these together, we can think of our system state (at least the parts of it we're interested in) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
+Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
 $$
 \mathbf x_k = \left[p^{\text{N}}_k, p^{\text{E}}_k, p^{\text{D}}_k, v^{\text{N}}_k, v^{\text{E}}_k, v^{\text{D}}_k, a^{\text{N}}_k, a^{\text{E}}_k, a^{\text{D}}_k, q^0_k, q^1_k, q^2_k, q^3_k, \omega^{\text{N}}_k, \omega^{\text{E}}_k, \omega^{\text{D}}_k\right]^T.
 $$
 
-## Translating Between Local and World Axes
+## Translating Between Local and World Frames
 
 Our goal is to use our local pitch-roll-yaw coordinate system measurements to estimate the system state in terms of the global coordinate system. A dificulty with calculating acceleration in this manner is that the direction of gravity will change as our local axes rotate, and our accelerometers will not be able to distinguish these orientation changes from actual world acceleration changes. In this section, we take advantage of our information on orientation in order to remedy the issue.
 
@@ -65,14 +65,14 @@ $$
 rotates a vector from the local frame to the world frame. In other words, we have
 $$
 \begin{align*}
-\mathbf a^{\text{world}}_k = \mathbf C_k \cdot \mathbf a^{\text{local}}_k, \\
+\mathbf a^{\text{world}}_k = \mathbf C_k \cdot \mathbf a^{\text{local}}_k, \\\\
 \boldsymbol\omega^{\text{world}}_k = \mathbf C_k \cdot \boldsymbol\omega^{\text{local}}_k.
 \end{align*}
 $$
 Furthermore, since $\mathbf C_k$ is an orthogonal matrix, its inverse is equal to its transpose $\mathbf C^T_k$, meaning that
 $$
 \begin{align*}
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k, \\
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k, \\\\
 \boldsymbol\omega^{\text{local}}_k = \mathbf C^T_k \cdot \boldsymbol\omega^{\text{world}}_k.
 \end{align*}
 $$
