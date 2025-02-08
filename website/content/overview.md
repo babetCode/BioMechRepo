@@ -1,7 +1,6 @@
 ---
 date: '2025-01-28T18:24:22-07:00'
 draft: false
-linkTitle: 'Overview'
 title: 'Mathematical Overview'
 math: true
 type: docs
@@ -9,7 +8,7 @@ breadcrumbs: false
 weight: 1
 ---
 
-## The Measurement Variable
+## Measurement Variable
 
 When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
 $$
@@ -28,7 +27,7 @@ $$
 
 It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
 
-## The State Variable
+## State Variable
 
 In order to determine when and how gait events happen, we would need to know the IMU's position and orientation in world frame axes, such as north($N$)-east($E$)-down($D$) axes. Additionally, it would be nice to have the IMU's velocity and acceleration in the world frame. To visualize this, we could assign variables to position, linear velocity, linear acceleration, orientation, and angular velocity, like this:
 $$
@@ -212,16 +211,16 @@ The state of the kalman filter is described by state variable $\mathbf x$ and th
 
 ### x
 
-As described in the *"Defining our State Variable"* section, we want $\mathbf x$ to be a be a 16x1 vector (though we could simplify it to 13x1 by removing linear acceleration). If we could set our origin at the initial position of the IMU, and we could be fairly certain that it would be stationary and aligned with $N$-$E$-$D$ axes when we start recording data, then a resonable initial state $\mathbf x_0$ might look like:
+As described in the *"State Variable"* section, we want $\mathbf x$ to be a be a 16x1 vector. If we could set our origin at the initial position of the IMU, and we could be fairly certain that it would be stationary and aligned with $N$-$E$-$D$ axes when we start recording data, then a resonable initial state $\mathbf x_0$ might look like:
 $$
-\begin{align*}
-\mathbf p^{\text{world}}_k &= \left[0,0,0\right]^T, \\\\
-\mathbf v^{\text{world}}_k &= \left[0,0,0\right]^T, \\\\
-\mathbf a^{\text{world}}_k &= \left[0,0,0\right]^T, \\\\
-\mathbf q^{\text{world}}_k &= \left[1,0,0,0\right]^T, \\\\
-\boldsymbol\omega^{\text{world}}_k &= \left[0,0,0\right]^T, \\\\
-\implies\mathbf x_0 &= \left[0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0\right]^T.
-\end{align*}
+\mathbf p^{\text{world}}_k = \begin{bmatrix}0 \\\ 0 \\\ 0\end{bmatrix},\ \ 
+\mathbf v^{\text{world}}_k = \begin{bmatrix}0 \\\ 0 \\\ 0\end{bmatrix},\ \ 
+\mathbf a^{\text{world}}_k = \begin{bmatrix}0 \\\ 0 \\\ 0\end{bmatrix},\ \ 
+\mathbf q^{\text{world}}_k = \begin{bmatrix}1 \\\ 0 \\\ 0 \\\ 0\end{bmatrix},\ \ 
+\boldsymbol\omega^{\text{world}}_k = \begin{bmatrix}0 \\\ 0 \\\ 0\end{bmatrix},
+$$
+$$
+\implies\mathbf x_0 = \begin{bmatrix}0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 1 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0\end{bmatrix}.
 $$
 
 ### P
@@ -247,7 +246,7 @@ $$
 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_{\omega_0^{\text{D}}}^2 \\\\
 \end{bmatrix},
 $$
-where $\sigma^2_{p^N_0}$ is the variance in the initial position in the north direction, and so on and so forth. As a general rule of thumb, it will be better to overestimate than underestimate - the filter will converge if $\mathbf P_0$ is too large, but might not if it's too small.
+where $\sigma^2_{p^N_0}$ is the variance in the initial position in the north direction, and so on and so forth. As a general rule of thumb, it will be better to overestimate than underestimate --- the filter will converge if $\mathbf P_0$ is too large, but might not if it's too small.
 
 ## Process
 
@@ -255,17 +254,73 @@ The process of the kalman filter is described by $\mathbf F$ (the state transiti
 
 ### F
 
-There are a few things we want $\mathbf F$ to do.
+Since we do not have any predetermined control inputs here, we want a 16x16 matrix $\mathbf F$ which we can multiply by the current state to get our predicted state in the next time step. To visualize this, we want a matrix which satisfies
+$$
+\begin{bmatrix}?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
+?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\ \end{bmatrix}
+\begin{bmatrix}
+p^\text N_{k} \\\
+p_k^\text E \\\
+p_k^\text D \\\
+v_k^\text N \\\
+v_k^\text E \\\
+v_k^\text D \\\
+a_k^\text N \\\
+a_k^\text E \\\
+a_k^\text D \\\
+q_k^0 \\\
+q_k^1 \\\
+q_k^2 \\\
+q_k^3 \\\
+\omega_k^\text{N} \\\
+\omega_k^\text{E} \\\
+\omega_k^\text{D} \\\
+\end{bmatrix}
+= \begin{bmatrix}
+p^\text N_{k+1} \\\
+p^\text E_{k+1} \\\
+p^\text D_{k+1} \\\
+p^\text N_{k} \\\
+v_{k+1}^\text E \\\
+v_{k+1}^\text D \\\
+a_{k+1}^\text N \\\
+a_{k+1}^\text E \\\
+a_{k+1}^\text D \\\
+q_{k+1}^0 \\\
+q_{k+1}^1 \\\
+q_{k+1}^2 \\\
+q_{k+1}^3 \\\
+\omega_{k+1}^\text{N} \\\
+\omega_{k+1}^\text{E} \\\
+\omega_{k+1}^\text{D} \\\
+\end{bmatrix}.
+$$
 
-1. <b><u>Position Update</u></b>
+There are a few things we need to make this happen.
 
-If $dt$ is the time between measurements, then we want it to update the postion $\mathbf p = \left[p_k^\text{N}, p_k^\text{E}, p_k^\text{D}\right]^T$ in a way that satisfies
+#### 1. Position Update
+
+Since the time between measurements is $dt$, then we want it to update the postion in a way that satisfies
 $$
 \mathbf p_{k+1} = \mathbf p_k + (\mathbf v_k)dt,
 $$ 
-where $\mathbf v = \left[v_k^\text{N}, v_k^\text{E}, v_k^\text{D}\right]^T$, and $dt$ is the time step between measurements. This expands to
+where $dt$ is the time step between measurements. This expands to
 $$
-\begin{bmatrix}p^\text N_{k+1}\\ p^\text E_{k+1}\\ p^\text D_{k+1}\end{bmatrix} = \begin{bmatrix}p^\text N_{k}\\ p^\text E_{k}\\ p^\text D_{k}\end{bmatrix} + \begin{bmatrix}v^\text N_{k}\\ v^\text E_{k}\\ v^\text D_{k}\end{bmatrix}dt.
+\begin{bmatrix}p^\text N_{k+1} \\\ p^\text E_{k+1} \\\ p^\text D_{k+1}\end{bmatrix} = \begin{bmatrix}p^\text N_{k} \\\ p^\text E_{k} \\\ p^\text D_{k}\end{bmatrix} + \begin{bmatrix}v^\text N_{k} \\\ v^\text E_{k} \\\ v^\text D_{k}\end{bmatrix}dt.
 $$
 Therefore, the top three rows of our matrix will be
 $$
@@ -276,20 +331,17 @@ $$
 \end{bmatrix}.
 $$
 
-2. <b><u>Velocity Update</u></b>
+#### 2. Velocity Update
 
-We  want it to update the velocity in way that satisfies
+We also want it to update the velocity in way that satisfies
 $$
-\mathbf v_{k+1} = \mathbf v_k + (\mathbf a_k - g)dt,
+\mathbf v_{k+1} = \mathbf v_k + (\mathbf a_k)dt,
 $$
-where the $-g$ term corrects for gravity. This expands to
+which similarly expands to
 $$
-\begin{align*}
-\begin{bmatrix}v_{k+1}^\text N\\ v_{k+1}^\text E\\ v_{k+1}^\text D\end{bmatrix} &= \begin{bmatrix}v_{k}^\text N\\ v_{k}^\text E\\ v_{k}^\text D\end{bmatrix} + \left(\begin{bmatrix}a_{k}^\text N\\ a_{k}^\text E\\ a_{k}^\text D\end{bmatrix} - \begin{bmatrix}0\\ 0\\ 9.8\end{bmatrix}\right)dt, \\\\
-&= \begin{bmatrix}v_{k}^\text N\\ v_{k}^\text E\\ v_{k}^\text D\end{bmatrix} + \begin{bmatrix}a_{k}^\text N\\ a_{k}^\text E\\ a_{k}^\text D-9.8\end{bmatrix}dt,
-\end{align*}
+\begin{bmatrix}v_{k+1}^\text N \\\ v_{k+1}^\text E \\\ v_{k+1}^\text D\end{bmatrix} = \begin{bmatrix}v_{k}^\text N \\\ v_{k}^\text E \\\ v_{k}^\text D\end{bmatrix} + \begin{bmatrix}a_{k}^\text N \\\ a_{k}^\text E \\\ a_{k}^\text D\end{bmatrix} dt,
 $$
-Since the resulting $-dt$ term at the bottom of the vector is non linearly dependent on the components of $\mathbf x$, we can model gravity's input to the system by letting $\mathbf{Bu}$ subtract $9.8(dt)$ from the $v^\text D$ component of $\mathbf x$ in the state update equation , and the next three rows of our matrix will be
+and similarly gives us the next three rows of our matrix
 $$
 \begin{bmatrix}
 0&0&0&1&0&0&dt&0&0&0&0&0&0&0&0&0\\\\
@@ -298,9 +350,9 @@ $$
 \end{bmatrix}.
 $$
 
-3. <b><u>Acceleration Update</u></b>
+#### 3. Acceleration Update
 
-To keep things simple, we won't predict change to the acceleration or angular velocity and will use
+To keep things simple, we won't predict change here, so we'll use
 $$
 \mathbf a_{k+1} = \mathbf a_k.
 $$
@@ -313,7 +365,7 @@ $$
 \end{bmatrix}.
 $$
 
-4. <b><u>Orientation Update</u></b>
+#### 4. Orientation Update
 
 We want it to update the orientation in a way that satisfies the quaternion update function
 $$
@@ -403,8 +455,9 @@ $$
 \end{bmatrix}.
 $$
 
-5. <b><u>Angular Velocity Update</u></b>
+#### 5. Angular Velocity Update
 
+We'll keep things simple here too by letting
 $$
 \boldsymbol\omega_{k+1} = \boldsymbol\omega_k.
 $$
@@ -439,10 +492,9 @@ $$
 \end{bmatrix}.
 $$
 
-*Notes:*
-- *We were able to write lines 10-13 of this matrix using our  observation that each component of $\mathbf q_{k+1}$ was of the form $[a(q^0_k)+b(q^1_k)+c(q^2_k)+d(q^3_k)]$, but we could have also found the form of the $\zeta^\text{th}$ component to be $[q^\zeta_k + a(\omega^N_k)+b(\omega^E_k)+c(\omega^D_k)]$. This second form will let us write a second, equavalent matrix to help double check we have placed our values correctly.*
-
-- *This state transition matrix assumes acceleration at time $t_{k+1}$ will approximately equal acceleration at time $t_k$, which is not necessarily true during jerky events such as heel strike.*
+*Notes:*  
+$\bullet$ *We were able to write lines 10-13 of this matrix using our  observation that each component of $\mathbf q_{k+1}$ was of the form $[a(q^0_k)+b(q^1_k)+c(q^2_k)+d(q^3_k)]$, but we could have also found the form of the $n^\text{th}$ component to be $[q^n + a(\omega^N_k)+b(\omega^E_k)+c(\omega^D_k)]$. This second form will let us write a second, equavalent matrix. As an intellecual exercise, you may double check this math by building this filter with the second matrix and verifying it produces the same results.*  
+$\bullet$ *This state transition matrix assumes the acceleration and angular velocity at time $t_{k+1}$ will approximately equal those at time $t_k$, which is a limitation of this filter during jerky events such as heel strike.*
 
 ### Q
 
@@ -476,9 +528,9 @@ The kalman filter's measurment is described by the measurement mean $\mathbf z$,
 
 ### z
 
-As described in the *Defining our State Variable* section, we will have
+As described in the *"Measurement Variable"* section, we will have
 $$
-\mathbf z_k = \left[a^{\text{pitch}}_k, a^{\text{roll}}_k, a^{\text{yaw}}_k, \omega^{\text{pitch}}_k, \omega^{\text{roll}}_k, \omega^{\text{yaw}}_k\right]^T.
+\mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
 $$
 
 ### R
@@ -504,17 +556,18 @@ $$
 \mathbf y_k = \mathbf z_k - \left(\mathbf H \mathbf\cdot\mathbf x_k\right).
 $$
 
-Let's expand the $\left(\mathbf H \mathbf\cdot\mathbf x_k\right)$ term to visualize our $\mathbf H$ matrix here:
+To visualize this in expanded form, we want a matrix $\mathbf H$ which satisfies
 $$
-\begin{bmatrix}?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
+\mathbf y_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix} -
+\left(\begin{bmatrix}?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\end{bmatrix}
-\begin{bmatrix} p^\text{N}_k\\\\ p^\text{E}_k\\\\ p^\text{D}_k\\\\ v^\text{N}_k\\\\ v^\text{E}_k\\\\ v^\text{D}_k\\\\ a^\text{N}_k\\\\ a^\text{E}_k\\\\ a^\text{D}_k\\\\ q^0_k\\\\ q^1_k\\\\ q^2_k\\\\ q^3_k\\\\ \omega^\text{N}_k\\\\ \omega^\text{E}_k\\\\ \omega^\text{D}_k \end{bmatrix}.
+\begin{bmatrix} p^\text{N}_k\\\\ p^\text{E}_k\\\\ p^\text{D}_k\\\\ v^\text{N}_k\\\\ v^\text{E}_k\\\\ v^\text{D}_k\\\\ a^\text{N}_k\\\\ a^\text{E}_k\\\\ a^\text{D}_k\\\\ q^0_k\\\\ q^1_k\\\\ q^2_k\\\\ q^3_k\\\\ \omega^\text{N}_k\\\\ \omega^\text{E}_k\\\\ \omega^\text{D}_k \end{bmatrix}\right).
 $$
-We see that the first three rows will be dotted with $\mathbf x_k$ to get the local acceleration, and the next three rows will be dotted with $\mathbf x_k$ to get the local rotational velocity. Using our $\mathbf C$ matrix from *Translating Between Local and World Axes*, we have
+We see that the first three rows will each be dotted with $\mathbf x_k$ to get the local acceleration, and the next three rows will be dotted with $\mathbf x_k$ to get the local rotational velocity. Using our $\mathbf C$ matrix from the *"Translating Between Local and World Frames"* section, we have
 $$
 \mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k,
 $$
