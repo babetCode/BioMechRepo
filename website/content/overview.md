@@ -13,15 +13,17 @@ weight: 1
 
 When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
 $$
-\mathbf a^{\text{local}}_k = \left[a^{\text{pitch}}_k, a^{\text{roll}}_k, a^{\text{yaw}}_k\right]^T,
+\mathbf a^{\text{local}}_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \end{bmatrix}.
 $$
+
 It will also give us rotational velocity along these local axes which we can write as
 $$
-\boldsymbol\omega^{local}_k = \left[\omega^{\text{pitch}}_k, \omega^{\text{roll}}_k, \omega^{\text{yaw}}_k\right]^T.
+\boldsymbol\omega^{local}_k = \begin{bmatrix} \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
 $$
-The superscript $T$ here denotes the transpose, because we will want these as column vectors later. Putting these together, we can think of our measurements as being represented by a variable $\mathbf z$, where at time $k$ the IMU gives us the reading
+
+Putting these together, we can think of our measurements as being represented by a variable $\mathbf z$, where at time $k$ the IMU gives us the reading
 $$
-\mathbf z_k = \left[a^{\text{pitch}}_k, a^{\text{roll}}_k, a^{\text{yaw}}_k, \omega^{\text{pitch}}_k, \omega^{\text{roll}}_k, \omega^{\text{yaw}}_k\right]^T.
+\mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
 $$
 
 It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
@@ -29,32 +31,31 @@ It's important to keep in mind that these measurements are with respect to the l
 ## The State Variable
 
 In order to determine when and how gait events happen, we would need to know the IMU's position and orientation in world frame axes, such as north($N$)-east($E$)-down($D$) axes. Additionally, it would be nice to have the IMU's velocity and acceleration in the world frame. To visualize this, we could assign variables to position, linear velocity, linear acceleration, orientation, and angular velocity, like this:
-
-$$\begin{align*}
-\mathbf p^{\text{world}}_k &= \left[p^{\text{N}}_k, p^{\text{E}}_k, p^{\text{D}}_k\right]^T, \\\\
-\mathbf v^{\text{world}}_k &= \left[v^{\text{N}}_k, v^{\text{E}}_k, v^{\text{D}}_k\right]^T, \\\\
-\mathbf a^{\text{world}}_k &= \left[a^{\text{N}}_k, a^{\text{E}}_k, a^{\text{D}}_k\right]^T, \\\\
-\mathbf q^{\text{world}}_k &= \left[q^0_k, q^1_k, q^2_k, q^3_k\right]^T, \\\\
-\boldsymbol\omega^{\text{world}}_k &= \left[\omega^{\text{N}}_k, \omega^{\text{E}}_k, \omega^{\text{D}}_k\right]^T. \\
-\end{align*}$$
+$$
+\begin{align*}
+\mathbf p^{\text{world}}_k &= \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \end{bmatrix}, \\\\
+\mathbf v^{\text{world}}_k &= \begin{bmatrix} v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \end{bmatrix}, \\\\
+\mathbf a^{\text{world}}_k &= \begin{bmatrix} a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \end{bmatrix}, \\\\
+\mathbf q^{\text{world}}_k &= \begin{bmatrix} q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \end{bmatrix}, \\\\
+\boldsymbol\omega^{\text{world}}_k &= \begin{bmatrix} \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
+\end{align*}
+$$
 
 Here, $\mathbf q_k^\text{world}$ is a vector representation of the quaternion $\left[q^0_k + i\left(q^1_k\right) + j\left(q^2_k\right) + k\left(q^3_k\right)\right]$. We use quaternions rather than matricies to represent orientation because they let us update our orientation much more easily using the quaternion update function
 $$
 \mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\left[0 + i\left(\omega^{\text{N}}_k\right) + j\left(\omega^{\text{E}}_k\right) + k\left(\omega^{\text{D}}_k\right)\right].
 $$
 
-Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
+*($\otimes$ represents quaternion multiplication).* Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
 $$
-\mathbf x_k = \left[p^{\text{N}}_k, p^{\text{E}}_k, p^{\text{D}}_k, v^{\text{N}}_k, v^{\text{E}}_k, v^{\text{D}}_k, a^{\text{N}}_k, a^{\text{E}}_k, a^{\text{D}}_k, q^0_k, q^1_k, q^2_k, q^3_k, \omega^{\text{N}}_k, \omega^{\text{E}}_k, \omega^{\text{D}}_k\right]^T.
+\mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
 $$
 
 ## Translating Between Local and World Frames
 
-Our goal is to use our local pitch-roll-yaw coordinate system measurements to estimate the system state in terms of the global coordinate system. A dificulty with calculating acceleration in this manner is that the direction of gravity will change as our local axes rotate, and our accelerometers will not be able to distinguish these orientation changes from actual world acceleration changes. In this section, we take advantage of our information on orientation in order to remedy the issue.
+Our goal is to use our local pitch-roll-yaw coordinate system measurements to estimate the system state in terms of the global coordinate system. A difficulty with calculating acceleration in this manner is that the direction of gravity will change as our local axes rotate, and our accelerometers will not be able to distinguish this change in gravity from a change in linear acceleration. In this section, we use our quaternion orientation to address the issue.
 
-At a given time $k$, we will have the IMU's orientation stored as a quaterion $\mathbf q_k$ that tells us how to rotate from a "neutral" orientation to IMU's current orientation. In order to use this information to calculate the component of acceleration which is gravity, we could stick to our quaternion guns and derive the proper sequence of quaternion multiplication, but since we are dealing with a "static" orientation here (since we are discretizing the problem, we treat $\mathbf q_k$ as constant for the duration of this specific time step) and do not need to interpolate between states, it will be more efficient to use matricies.
-
-The rotation matrix $\mathbf C_k$, defined as
+At a given time $k$, we will have the IMU's orientation stored as a quaterion $\mathbf q_k$ which represents the rotation from a "neutral" orientation to IMU's current orientation. In order to calculate the "down" direction from this, it is most efficient to convert this quaternion to a matrix. The rotation matrix $\mathbf C_k$, defined as
 $$
 \mathbf C_k = \begin{bmatrix}
 1 - 2\big((q^2_k)^2 + (q^3_k)^2\big) & 2\big(q^1_k q^2_k - q^0_k q^3_k\big) & 2\big(q^1_k q^3_k + q^0_k q^2_k\big) \\\\
@@ -69,31 +70,30 @@ $$
 \boldsymbol\omega^{\text{world}}_k = \mathbf C_k \cdot \boldsymbol\omega^{\text{local}}_k.
 \end{align*}
 $$
-Furthermore, since $\mathbf C_k$ is an orthogonal matrix, its inverse is equal to its transpose $\mathbf C^T_k$, meaning that
+Furthermore, since $\mathbf C_k$ is an orthogonal matrix, its inverse must be equal to its transpose $\mathbf C^T_k$, and thus
 $$
 \begin{align*}
 \mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k, \\\\
 \boldsymbol\omega^{\text{local}}_k = \mathbf C^T_k \cdot \boldsymbol\omega^{\text{world}}_k.
 \end{align*}
 $$
-Because of this, we can calculate world frame acceleration from our local measurements in a way that accounts for gravity. If we are measuring acceleration m/s^2, and at time $k$ our sensor is stationary and aligned with the $N$-$E$-$D$ axes, it should read
-$$
-\mathbf a^{\text{local}}_k = \begin{bmatrix}a^{\text{N}}_k \\ a^{\text{E}}_k \\ a^{\text{D}}_k\end{bmatrix} = \begin{bmatrix}0 \\ 0 \\ 9.8\end{bmatrix}.
-$$
+Because of this, we can calculate world frame acceleration from our local measurements in a way that accounts for gravity. If we are measuring acceleration in m/s^2 units then we will always have
+$$\mathbf a^{\text{world}}_k = \begin{bmatrix} a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \end{bmatrix} = \begin{bmatrix} 0 \\\ 0 \\\ 9.81 \end{bmatrix}.$$
+
 Therefore, a stationary sensor with any given pitch-roll-yaw axes should read
 $$
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix}0 \\ 0 \\ 9.8\end{bmatrix}.
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix} 0 \\\ 0 \\\ 9.81 \end{bmatrix}.
 $$
-By extension, any deviation from this value means that the sensor is actually accelerating in the world frame, so at any time $k$ our sensor should read
+By extension, any deviation from this value means that the sensor is accelerating in the world frame, so at any time $k$ our sensor should read
 $$
 \mathbf a^{\text{local}}_k = \mathbf C^T_k \left(\mathbf a^{\text{world}}_k + \begin{bmatrix}0 \\ 0 \\ 9.8\end{bmatrix}\right).
 $$
 This looks like exactly what we need! To make things more concise, we will add $\mathbf a^{\text{world}}$ and gravity together into one vector, and write
 $$
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix}a^{\text{N}}_k \\ a^{\text{E}}_k \\ a^{\text{D}}_k + 9.8\end{bmatrix}.
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}.
 $$
 
-Now that we've defined our problem and seen a bit of how our measurment and state variables relate to each other, it's time to build a sensor fusion algorith to estimate state from measurements. We have a variety of options such as complemetary filter, madgwick filter, mahony filter, kalman filter, etc....
+Now that we've defined our problem and seen a bit of how our measurment and state variables relate to each other, it's time to build a sensor fusion algorith to estimate state from measurements.
 
 ## Kalman Filter
 
