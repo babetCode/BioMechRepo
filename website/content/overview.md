@@ -40,12 +40,71 @@ $$
 \end{align*}
 $$
 
-Here, $\mathbf q_k^\text{world}$ is a vector representation of the quaternion $\left[q^0_k + i\left(q^1_k\right) + j\left(q^2_k\right) + k\left(q^3_k\right)\right]$. We use quaternions rather than matricies to represent orientation because they let us update our orientation much more easily using the quaternion update function
+Here, $\mathbf q_k^\text{world}$ is a vector representation of the quaternion $\left[q^0_k + i\left(q^1_k\right) + j\left(q^2_k\right) + k\left(q^3_k\right)\right]$. We use quaternions rather than matricies to represent orientation because they let us update our orientation using the quaternion update function
 $$
-\mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\left[0 + i\left(\omega^{\text{N}}_k\right) + j\left(\omega^{\text{E}}_k\right) + k\left(\omega^{\text{D}}_k\right)\right].
+\mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\left[0 + i\left(\omega^{\text{N}}_k\right) + j\left(\omega^{\text{E}}_k\right) + k\left(\omega^{\text{D}}_k\right)\right],
 $$
+providing a consistent method for interpolating angles between time steps *($\otimes$ represents the "[Hamilton product](https://en.wikipedia.org/wiki/Quaternion#:~:text=of%20vector%20quaternions.-,Hamilton%20product,-%5Bedit%5D)", AKA quaternion multiplication).*
 
-*($\otimes$ represents quaternion multiplication).* Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
+{{< details-html title="What are Quaternions?" closed="true" >}}
+{{< md >}}
+Quaternions are four-dimensional hypercomplex numbers which offer a powerful approach to orientation tracking because of their capacity for representing three-dimensional rotations. Specifically, a single unit quaternion can represent any 3d rotation without the common pitfalls of other rotation representations, such as gimbal lock. Moreover, quaternions allow for efficient and numerically stable calculations, especially beneficial in real-time tracking contexts like gait analysis. The quaternion-based approach simplifies the compounding of rotations by encapsulating complex rotational transformations in quaternion multiplication, reducing the risk of drift and improving accuracy in sensor fusion algorithms. This capability makes quaternions particularly well-suited for the recursive nature of state estimation models, where orientation data from consecutive IMU measurements need to be seamlessly integrated over time.
+
+Quaternions also support interpolation methods such as spherical linear interpolation (SLERP), which preserves the shortest path of rotation and minimizes error, critical in applications like gait analysis where precise orientation tracking is needed. This combination of stability, efficiency, and the ability to handle continuous rotations makes quaternions an optimal choice for robust and reliable orientation tracking in IMU-based gait analysis.
+
+Quaternions represent orientation through a four-dimensional structure that encodes three-dimensional rotation in a single unit quaternion, commonly denoted $q = w + xi + yj + zk$, where $w$, $x$, $y$, and $z$ are real numbers and $i$, $j$, and $k$, are imaginary units. The product $ijk$ is defined to equal $-1$, and multiplication between any two imaginaries follows the rules of the table below, where the left column shows the left factor and the top row shows the right factor (note that the products are *not* commutative):
+| $\boldsymbol\otimes$ | $\textbf{\textit i}$ | $\textbf{\textit j}$ | $\textbf{\textit k}$ |
+|----------------------|----------------------|----------------------|----------------------|
+| $\textbf{\textit i}$ |  $-1$   |   $k$   |  $-j$   |
+| $\textbf{\textit j}$ |  $-k$   |  $-1$   |   $i$   |
+| $\textbf{\textit k}$ |   $j$   |  $-i$   |  $-1$   |
+
+Multiplication between two quaternions $q_1 = w_1 + x_1i + y_1j + z_1k$ and $q_2 = w_2 + x_2i + y_2j + z_2k$, is defined according to the Hamilton product formula:
+$$\begin{align*}
+q=q_1 \otimes q_2=&\ \ \left(w_1w_2 - x_1x_2 - y_1y_2 - z_1z_2\right) \\\
+&+ \left(w_1x_2 + x_1w_2 + y_1z_2 - z_1y_2\right)i \\\
+&+ \left(w_1y_2 - x_1z_2 + y_1w_2 + z_1x_2\right)j \\\
+&+ \left(w_1z_2 + x_1y_2 - y_1x_2 + z_1w_2\right)k,
+\end{align*}$$
+which is also *not* commutative.
+
+Quaternions can represent changes in orientation by representing the rotation by a given angle around some axis passing through the origin. Consider the rotation of a point $P$ by an angle of $\theta$ around an axis $A$ which passes through the origin. First, we normalize the vector $A$ such that if it has components $x$, $y$, $z$, then $x^2+y^2+z^2=1$. Next, we construct a quaternion $q$ such that
+$$q = (\cos(\theta/2)+\sin(\theta/2)(xi+yj+zk)),$$
+and its inverse $q^{-1}$ such that
+$$q^{-1} = (\cos(\theta/2)-\sin(\theta/2)(xi+yj+zk)).$$
+Now, we make a quaternion for our point $P$ so that if our point $P$ had coordinates $a$, $b$, $c$, then our quaternion $p$ is defined by
+$$p = ai+bj+ck.$$
+Now, to find the projection $P^\prime$ after the rotation, we have
+$$P^\prime = q\otimes p\otimes q^{-1}.$$
+
+This framework for how quaternions work is admittedly quite non-intuitive. However, if a more in depth explanation of the mechanics is desired, it can be found in CGP Grey's videos "[Visualizing quaternions (4d numbers) with stereographic projection](https://www.youtube.com/watch?v=d4EgbgTm0Bg)" and "[Visualizing quaternions (4d numbers) with stereographic projection](https://www.youtube.com/watch?v=zjMuIxRvygQ)", as well as his "[Visualizing Quaternions](https://eater.net/quaternions)" webpage with Ben Eater. For the rest of this notebook, these rules will continue to be used without further explanation.
+
+To represent a pure rotation, a quaternion should be normalized (i.e., it has a unit magnitude), which ensures that it purely represents rotation without scaling effects. To represent an orientation, a quaternion is computed based on a rotation axis and angle: a rotation of $\theta$ around a vector $(x, y, z)$ passing through the origin, is represented as $q = \cos(\theta/2) + (xi, yj, zk)\sin(\theta/2)$. When applied to a point, the point will rotate by the specified angle around the given vector.
+
+---
+
+Quaternions are 4-dimensional complex numbers, commonly used to represent orientation and rotations. Similar to 2d rotations modeled in the complex plane with a real component and imaginary component, quaternions extend this concept to 3d rotations, with a real component and three imaginary components --- $i$, $j$, and $k$.
+{{< /md >}}
+{{< youtube zjMuIxRvygQ >}}
+{{< /details-html >}}
+
+Quaternions are 4-dimensional complex numbers, commonly used to represent orientation and rotations. Similar to 2d rotations modeled in the complex plane with a real component and imaginary component, quaternions extend this concept to 3d rotations, with a real component and three imaginary components --- $i$, $j$, and $k$. By convention, quaternions are used to represent orientation by representing the rotation necessary for an object to go from some predefined "neutral" to its current orientation. Specifically, quaternions are four dimensional numbers of the form
+$$\left[a + bi + cj + dk \right],$$
+where $a$, $b$, $c$, $d$ are real numbers, and $i$, $j$, $k$ are orthogonal imaginary unit vectors in hyperspace.
+
+The product $ijk$ is defined to equal $-1$, and multiplication between any two imaginaries follows the rules of the table below, where the left column shows the left factor and the top row shows the right factor (note that the products are *not* commutative):
+| $\boldsymbol\otimes$ | $\textbf{\textit i}$ | $\textbf{\textit j}$ | $\textbf{\textit k}$ |
+|----------------------|----------------------|----------------------|----------------------|
+| $\textbf{\textit i}$ |  $-1$   |   $k$   |  $-j$   |
+| $\textbf{\textit j}$ |  $-k$   |  $-1$   |   $i$   |
+| $\textbf{\textit k}$ |   $j$   |  $-i$   |  $-1$   |
+
+
+
+a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
+
+
+Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
 $$
 \mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
 $$
