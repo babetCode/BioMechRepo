@@ -569,9 +569,9 @@ $$
 $$
 We see that the first three rows will each be dotted with $\mathbf x_k$ to get the local acceleration, and the next three rows will be dotted with $\mathbf x_k$ to get the local rotational velocity. Using our $\mathbf C$ matrix from the *"Translating Between Local and World Frames"* section, we have
 $$
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k,
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}.
 $$
-which expands to
+This expands to
 $$
 \begin{bmatrix}a^{\text{pitch}}_k \\\\ a^{\text{roll}}_k \\\\ a^{\text{yaw}}_k\end{bmatrix} =
 \begin{bmatrix}
@@ -579,13 +579,13 @@ $$
 2\big(q^1_k q^2_k + q^0_k q^3_k\big) & 1 - 2\big((q^1_k)^2 + (q^3_k)^2\big) & 2\big(q^2_k q^3_k - q^0_k q^1_k\big) \\\\
 2\big(q^1_k q^3_k - q^0_k q^2_k\big) & 2\big(q^2_k q^3_k + q^0_k q^1_k\big) & 1 - 2\big((q^1_k)^2 + (q^2_k)^2\big)
 \end{bmatrix}^T
-\begin{bmatrix}a^{\text{N}}_k \\\\ a^{\text{E}}_k \\\\ a^{\text{D}}_k\end{bmatrix}.
+\begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}.
 $$
 To simplify things, let's define
 $$
 \begin{align*}
-c^1_k &= 2\big(q^1_k q^2_k - q^0_k q^3_k\big) \\\\
 c^0_k &= 1 - 2\big((q^2_k)^2 + (q^3_k)^2\big) \\\\
+c^1_k &= 2\big(q^1_k q^2_k - q^0_k q^3_k\big) \\\\
 c^2_k &= 2\big(q^1_k q^3_k + q^0_k q^2_k\big) \\\\
 c^3_k &= 2\big(q^1_k q^2_k + q^0_k q^3_k\big) \\\\
 c^4_k &= 1 - 2\big((q^1_k)^2 + (q^3_k)^2\big) \\\\
@@ -597,28 +597,26 @@ c^8_k &= 1 - 2\big((q^1_k)^2 + (q^2_k)^2\big),
 $$
 so that we can write
 $$
-\begin{align*}
-\begin{bmatrix}a^{\text{pitch}}_k \\\\ a^{\text{roll}}_k \\\\ a^{\text{yaw}}_k\end{bmatrix} &=
+\begin{bmatrix}a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\\ a^{\text{yaw}}_k\end{bmatrix} =
 \begin{bmatrix}
-c^0_k & c^1_k & c^2_k \\\\
-c^3_k & c^4_k & c^5_k \\\\
+c^0_k & c^1_k & c^2_k \\\
+c^3_k & c^4_k & c^5_k \\\
 c^6_k & c^7_k & c^8_k
 \end{bmatrix}^T
-\begin{bmatrix}a^{\text{N}}_k \\\\ a^{\text{E}}_k \\\\ a^{\text{D}}_k\end{bmatrix}\\\\
-&= \begin{bmatrix}
-c^0_k & c^3_k & c^6_k \\\\
-c^1_k & c^4_k & c^7_k \\\\
+\begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}
+= \begin{bmatrix}
+c^0_k & c^3_k & c^6_k \\\
+c^1_k & c^4_k & c^7_k \\\
 c^2_k & c^5_k & c^8_k
 \end{bmatrix}
-\begin{bmatrix}a^{\text{N}}_k \\\\ a^{\text{E}}_k \\\\ a^{\text{D}}_k\end{bmatrix}
-\end{align*}
+\begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}.
 $$
 From here, we can start to fill in the first three rows of $\mathbf H$:
 $$
 \mathbf H = \begin{bmatrix}
-0&0&0&0&0&0&c^0_k&c^3_k&c^6_k&0&0&0&0&0&0&0\\\\
-0&0&0&0&0&0&c^1_k&c^4_k&c^7_k&0&0&0&0&0&0&0\\\\
-0&0&0&0&0&0&c^2_k&c^5_k&c^8_k&0&0&0&0&0&0&0\\\\
+0&0&0&0&0&0&c^0_k&c^3_k&\left(c^6_k + 9.8c^6_k/a_k^\text D\right)&0&0&0&0&0&0&0\\\\
+0&0&0&0&0&0&c^1_k&c^4_k&\left(c^7_k + 9.8c^7_k/a_k^\text D\right)&0&0&0&0&0&0&0\\\\
+0&0&0&0&0&0&c^2_k&c^5_k&\left(c^8_k + 9.8c^8_k/a_k^\text D\right)&0&0&0&0&0&0&0\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\\
 ?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?
@@ -643,9 +641,9 @@ Meaning our matrix should look like
 $$
 \mathbf H =
 \begin{bmatrix}
-0&0&0&0&0&0&c^0_k&c^1_k&c^2_k&0&0&0&0&0&0&0\\\\
-0&0&0&0&0&0&c^3_k&c^4_k&c^5_k&0&0&0&0&0&0&0\\\\
-0&0&0&0&0&0&c^6_k&c^7_k&c^8_k&0&0&0&0&0&0&0\\\\
+0&0&0&0&0&0&c^0_k&c^3_k&\left(c^6_k + 9.8c^6_k/a_k^\text D\right)&0&0&0&0&0&0&0\\\\
+0&0&0&0&0&0&c^1_k&c^4_k&\left(c^7_k + 9.8c^7_k/a_k^\text D\right)&0&0&0&0&0&0&0\\\\
+0&0&0&0&0&0&c^2_k&c^5_k&\left(c^8_k + 9.8c^8_k/a_k^\text D\right)&0&0&0&0&0&0&0\\\\
 0&0&0&0&0&0&0&0&0&0&0&0&0&c^0_k&c^3_k&c^6_k\\\\
 0&0&0&0&0&0&0&0&0&0&0&0&0&c^1_k&c^4_k&c^7_k\\\\
 0&0&0&0&0&0&0&0&0&0&0&0&0&c^2_k&c^5_k&c^8_k
