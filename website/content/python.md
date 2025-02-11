@@ -90,6 +90,6 @@ This should return:
 &nbsp;[0 1 0]  
 &nbsp;[0 0 1]]</span>
 
-More generally, a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
+More generally, our <a href="/overview/#quaternions" target="_blank">quaternion equation from earlier</a> tells us that a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
 
 <!-- One of the easiest ways to implement kamlan filters in python is using Roger Labbe's [FilterPy](https://filterpy.readthedocs.io/en/latest/) library. -->
