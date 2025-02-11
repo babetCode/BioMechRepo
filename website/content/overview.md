@@ -46,6 +46,12 @@ $$
 $$
 providing a consistent method for interpolating angles between time steps *($\otimes$ represents the "[Hamilton product](https://en.wikipedia.org/wiki/Quaternion#:~:text=of%20vector%20quaternions.-,Hamilton%20product,-%5Bedit%5D)", AKA quaternion multiplication).*
 
+Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
+$$
+\mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
+$$
+
+### Notes on Quaternions:
 {{< details-html title="What are Quaternions?" closed="true" >}}
 {{< md >}}
 
@@ -88,11 +94,6 @@ Part 1:
 {{< md >}}Part 2:{{< /md >}}
 {{< youtube zjMuIxRvygQ >}}
 {{< /details-html >}}
-
-Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
-$$
-\mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
-$$
 
 ## Translating Between Local and World Frames
 
