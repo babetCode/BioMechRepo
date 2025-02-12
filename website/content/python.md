@@ -49,15 +49,15 @@ $$
 We can represent these with:
 ```py
 # initial state
-x_0 = np.array([[0], [0], [0],
-                [0], [0], [0],
-                [0], [0], [0],
-                [1], [0], [0], [0],
-                [0], [0], [0]])
+x = np.array([[0], [0], [0], # position
+              [0], [0], [0], # velocity
+              [0], [0], [0], # acceleration
+              [1], [0], [0], [0], # orientation
+              [0], [0], [0]]) # rotational velocity
 
 # initial measurements
-z_0 = np.array([[0], [0], [0],
-                [0], [0], [0]])
+z = np.array([[0], [0], [0], # acceleration
+              [0], [0], [0]]) # rotational velocity
 ```
 
 ### Rotations
@@ -65,8 +65,7 @@ We can find our rotation matrix $\mathbf C$ using:
 ```py
 def c_matrix(quaternion: np.ndarray) -> np.ndarray:
     if len(quaternion) != 4:
-        raise ValueError(f"Expected quaternion of length 4, \
-                         got {len(quaternion)} instead")
+        raise ValueError(f"Expected quaternion of length 4, got {len(quaternion)} instead")
 
     quaternion = quaternion.reshape(-1, 1)
     q0 = quaternion[0, 0]
@@ -80,9 +79,11 @@ def c_matrix(quaternion: np.ndarray) -> np.ndarray:
 
     return c
 ```
-As a basic check, we can verify the identity quaternion from <span style="font-family:monospace">x_0</span> produces the identify matrix:
+
+{{< details title="Testing this" closed="true" >}}
+As a basic check, we can verify the identity quaternion <span style="font-family:monospace">x[9:13]</span> produces the identify matrix:
 ```py
-quat = x_0[9:13]
+quat = x[9:13]
 print(c_matrix(quat))
 ```
 This should return:  
@@ -91,5 +92,31 @@ This should return:
 &nbsp;[0 0 1]]</span>
 
 More generally, our <a href="/overview/#quaternions" target="_blank">quaternion equation from earlier</a> tells us that a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
+{{< /details >}}
 
-<!-- One of the easiest ways to implement kamlan filters in python is using Roger Labbe's [FilterPy](https://filterpy.readthedocs.io/en/latest/) library. -->
+## Kalman Filter
+
+### F
+
+```py
+dt = .01 # Adjust to data rate as needed
+
+wN = x[13]
+
+F_upper_left = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
+                         [0, 1, 0, 0, dt, 0, 0, 0, 0],
+                         [0, 0, 1, 0, 0, dt, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, dt, 0, 0],
+                         [0, 0, 0, 0, 1, 0, 0, dt, 0],
+                         [0, 0, 0, 0, 0, 1, 0, 0, dt],
+                         [0, 0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 1]])
+
+
+```
+
+
+One of the easiest ways to implement kamlan filters in python is using Roger Labbe's [FilterPy](https://filterpy.readthedocs.io/en/latest/) library.
+
+

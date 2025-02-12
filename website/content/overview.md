@@ -1,145 +1,16 @@
 ---
 date: '2025-01-28T18:24:22-07:00'
 draft: false
-title: 'Mathematical Overview'
+title: 'EKF Overview'
 math: true
 type: docs
 breadcrumbs: false
 weight: 1
 ---
 
-## Measurement Variable
+The Kalman Filter is a recursive algorithm used to estimate the state of dynamic systems from noisy measurements. One of its application is tracking the orientation of an Inertial Measurement Unit (IMU). IMUs provide data on acceleration and angular velocity but are prone to noise and drift over time. The Kalman Filter helps fuse this noisy sensor data with a predictive model to more accurately estimate the IMU's orientation given the measurement errors. In general, the Kalman Filter's ability to combine system predictions with real-time observations to produce optimal state estimates makes it useful in dynamic systems where the state changes over time. It is also computationally efficient due to its recursive nature, making it suitable for real-time applications. Here, I describe an extended kalman filter (one of many types of kalman filters) for a 6-axis IMU.
 
-When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
-$$
-\mathbf a^{\text{local}}_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \end{bmatrix}.
-$$
-
-It will also give us rotational velocity along these local axes which we can write as
-$$
-\boldsymbol\omega^{local}_k = \begin{bmatrix} \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
-$$
-
-Putting these together, we can think of our measurements as being represented by a variable $\mathbf z$, where at time $k$ the IMU gives us the reading
-$$
-\mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
-$$
-
-It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
-
-## State Variable
-
-In order to determine when and how gait events happen, we would need to know the IMU's position and orientation in world frame axes, such as north($N$)-east($E$)-down($D$) axes. Additionally, it would be nice to have the IMU's velocity and acceleration in the world frame. To visualize this, we could assign variables to position, linear velocity, linear acceleration, orientation, and angular velocity, like this:
-$$
-\begin{align*}
-\mathbf p^{\text{world}}_k &= \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \end{bmatrix}, \\\\
-\mathbf v^{\text{world}}_k &= \begin{bmatrix} v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \end{bmatrix}, \\\\
-\mathbf a^{\text{world}}_k &= \begin{bmatrix} a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \end{bmatrix}, \\\\
-\mathbf q^{\text{world}}_k &= \begin{bmatrix} q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \end{bmatrix}, \\\\
-\boldsymbol\omega^{\text{world}}_k &= \begin{bmatrix} \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
-\end{align*}
-$$
-
-Here, $\mathbf q_k^\text{world}$ is a vector representation of the quaternion $\left[q^0_k + i\left(q^1_k\right) + j\left(q^2_k\right) + k\left(q^3_k\right)\right]$. We use quaternions rather than matricies to represent orientation because they let us update our orientation using the quaternion update function
-$$
-\mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\left[0 + i\left(\omega^{\text{N}}_k\right) + j\left(\omega^{\text{E}}_k\right) + k\left(\omega^{\text{D}}_k\right)\right],
-$$
-providing a consistent method for interpolating angles between time steps *($\otimes$ represents the "[Hamilton product](https://en.wikipedia.org/wiki/Quaternion#:~:text=of%20vector%20quaternions.-,Hamilton%20product,-%5Bedit%5D)", AKA quaternion multiplication).*
-
-Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
-$$
-\mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
-$$
-
-### Quaternions
-{{< details-html title="What are Quaternions?" closed="true" >}}
-{{< md >}}
-
-
-Quaternions are four-dimensional hypercomplex numbers which offer a powerful approach to orientation tracking because of their capacity for representing three-dimensional rotations. Specifically, a single unit quaternion can represent any 3d rotation without the common pitfalls of other rotation representations, such as gimbal lock. Moreover, quaternions allow for efficient and numerically stable calculations, especially beneficial in real-time tracking contexts like gait analysis. The quaternion-based approach simplifies the compounding of rotations by encapsulating complex rotational transformations in quaternion multiplication, reducing the risk of drift and improving accuracy in sensor fusion algorithms. This capability makes quaternions particularly well-suited for the recursive nature of state estimation models, where orientation data from consecutive IMU measurements need to be seamlessly integrated over time.
-
-Quaternions also support interpolation methods such as spherical linear interpolation (SLERP), which preserves the shortest path of rotation and minimizes error, critical in applications like gait analysis where precise orientation tracking is needed. This combination of stability, efficiency, and the ability to handle continuous rotations makes quaternions an optimal choice for robust and reliable orientation tracking in IMU-based gait analysis.
-
-Quaternions represent orientation through a four-dimensional structure that encodes three-dimensional rotation in a single unit quaternion, commonly denoted $q = w + xi + yj + zk$, where $w$, $x$, $y$, and $z$ are real numbers and $i$, $j$, and $k$, are imaginary units. The product $ijk$ is defined to equal $-1$, and multiplication between any two imaginaries follows the rules of the table below, where the left column shows the left factor and the top row shows the right factor (note that the products are *not* commutative):
-| $\boldsymbol\otimes$ | $\textbf{\textit i}$ | $\textbf{\textit j}$ | $\textbf{\textit k}$ |
-|----------------------|----------------------|----------------------|----------------------|
-| $\textbf{\textit i}$ |  $-1$   |   $k$   |  $-j$   |
-| $\textbf{\textit j}$ |  $-k$   |  $-1$   |   $i$   |
-| $\textbf{\textit k}$ |   $j$   |  $-i$   |  $-1$   |
-
-Multiplication between two quaternions $q_1 = w_1 + x_1i + y_1j + z_1k$ and $q_2 = w_2 + x_2i + y_2j + z_2k$, is defined according to the Hamilton product formula:
-$$\begin{align*}
-q=q_1 \otimes q_2=&\ \ \left(w_1w_2 - x_1x_2 - y_1y_2 - z_1z_2\right) \\\
-&+ \left(w_1x_2 + x_1w_2 + y_1z_2 - z_1y_2\right)i \\\
-&+ \left(w_1y_2 - x_1z_2 + y_1w_2 + z_1x_2\right)j \\\
-&+ \left(w_1z_2 + x_1y_2 - y_1x_2 + z_1w_2\right)k,
-\end{align*}$$
-which is also *not* commutative.
-
-Quaternion multiplication is useful in representing 3d rotations because it can easily compute a rotation by a given angle around some axis passing through the origin. Consider the rotation of a point $P$ by an angle of $\theta$ around an axis $A$ which passes through the origin. First, we normalize the vector $\overrightarrow A$ such that if it has components $x$, $y$, $z$, then $x^2+y^2+z^2=1$. Next, we construct a quaternion $q$ such that
-$$q = (\cos(\theta/2)+\sin(\theta/2)(xi+yj+zk)),$$
-and its inverse $q^{-1}$ such that
-$$q^{-1} = (\cos(\theta/2)-\sin(\theta/2)(xi+yj+zk)).$$
-Now, we make a quaternion for our point $P$ so that if our point $P$ had coordinates $a$, $b$, $c$, then our quaternion $p$ is defined by
-$$p = ai+bj+ck.$$
-Now, to find the projection $P^\prime$ after the rotation, we have
-$$P^\prime = q\otimes p\otimes q^{-1}.$$
-By convention, quaternions are used to represent orientation by representing the rotation necessary for an object to go from some predefined "neutral" to its current orientation. In other words, a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation from neutral of $\theta$ around the vector $\langle x,y,z \rangle$.
-
-This framework for how quaternions work is admittedly not intuitive. The videos below from 3Blue1Brown provide a more in depth explanation of the mechanics, with helpful visuals.
-
-Part 1:
-{{< /md >}}
-{{< youtube d4EgbgTm0Bg >}}
-{{< md >}}Part 2:{{< /md >}}
-{{< youtube zjMuIxRvygQ >}}
-{{< /details-html >}}
-
-## Translating Between Local and World Frames
-
-Our goal is to use our local pitch-roll-yaw coordinate system measurements to estimate the system state in terms of the global coordinate system. A difficulty with calculating acceleration in this manner is that the direction of gravity will change as our local axes rotate, and our accelerometers will not be able to distinguish this change in gravity from a change in linear acceleration. In this section, we use our quaternion orientation to address the issue.
-
-At a given time $k$, we will have the IMU's orientation stored as a quaterion $\mathbf q_k$ which represents the rotation from a "neutral" orientation to IMU's current orientation. In order to calculate the "down" direction from this, it is most efficient to convert this quaternion to a matrix. The rotation matrix $\mathbf C_k$, defined as
-$$
-\mathbf C_k = \begin{bmatrix}
-1 - 2\big((q^2_k)^2 + (q^3_k)^2\big) & 2\big(q^1_k q^2_k - q^0_k q^3_k\big) & 2\big(q^1_k q^3_k + q^0_k q^2_k\big) \\\\
-2\big(q^1_k q^2_k + q^0_k q^3_k\big) & 1 - 2\big((q^1_k)^2 + (q^3_k)^2\big) & 2\big(q^2_k q^3_k - q^0_k q^1_k\big) \\\\
-2\big(q^1_k q^3_k - q^0_k q^2_k\big) & 2\big(q^2_k q^3_k + q^0_k q^1_k\big) & 1 - 2\big((q^1_k)^2 + (q^2_k)^2\big)
-\end{bmatrix},
-$$
-rotates a vector from the local frame to the world frame. In other words, we have
-$$
-\begin{align*}
-\mathbf a^{\text{world}}_k = \mathbf C_k \cdot \mathbf a^{\text{local}}_k, \\\\
-\boldsymbol\omega^{\text{world}}_k = \mathbf C_k \cdot \boldsymbol\omega^{\text{local}}_k.
-\end{align*}
-$$
-Furthermore, since $\mathbf C_k$ is an orthogonal matrix, its inverse must be equal to its transpose $\mathbf C^T_k$, and thus
-$$
-\begin{align*}
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k, \\\\
-\boldsymbol\omega^{\text{local}}_k = \mathbf C^T_k \cdot \boldsymbol\omega^{\text{world}}_k.
-\end{align*}
-$$
-Because of this, we can calculate world frame acceleration from our local measurements in a way that accounts for gravity. If we are measuring acceleration in m/s^2 units then we will always have
-$$\mathbf a^{\text{world}}_k = \begin{bmatrix} a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \end{bmatrix} = \begin{bmatrix} 0 \\\ 0 \\\ 9.81 \end{bmatrix}.$$
-
-Therefore, a stationary sensor with any given pitch-roll-yaw axes should read
-$$
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix} 0 \\\ 0 \\\ 9.81 \end{bmatrix}.
-$$
-By extension, any deviation from this value means that the sensor is accelerating in the world frame, so at any time $k$ our sensor should read
-$$
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \left(\mathbf a^{\text{world}}_k + \begin{bmatrix}0 \\ 0 \\ 9.8\end{bmatrix}\right).
-$$
-This looks like exactly what we need! To make things more concise, we will add $\mathbf a^{\text{world}}$ and gravity together into one vector, and write
-$$
-\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}.
-$$
-
-Now that we've defined our problem and seen a bit of how our measurment and state variables relate to each other, it's time to build a sensor fusion algorith to estimate state from measurements.
-
-## Kalman Filter
+## Kalman Equations
 
 The kalman filter estimates an nx1 column vector state variable ($\mathbf x$), based on some mx1 column vector measurement ($\mathbf z$), using a system model:
 $$
@@ -250,6 +121,229 @@ $\mathbf B$ and $\mathbf u$ are new to us. They let us model control inputs to t
 
 Lets try applying this to our problem.
 
+## Measurement Variable
+
+{{< tabs items="Math,Python" >}}
+{{< tab >}}
+When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
+$$
+\mathbf a^{\text{local}}_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \end{bmatrix}.
+$$
+
+It will also give us rotational velocity along these local axes which we can write as
+$$
+\boldsymbol\omega^{local}_k = \begin{bmatrix} \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
+$$
+
+Putting these together, we can think of our measurements as being represented by a variable $\mathbf z$, where at time $k$ the IMU gives us the reading
+$$
+\mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
+$$
+
+It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
+{{< /tab >}}
+
+{{< tab >}}
+Python is ideal for building a Kalman filter due to its simplicity, readability, and robust libraries for linear algebra and data analysis.
+
+**Numpy Arrays**  
+NumPy arrays are n-dimensional data structures that enable efficient computations and are particularly well-suited for handling the matrix manipulations required in Kalman filtering.
+
+**Matrix Multiplication with Numpy**  
+Consider the expression
+$$\begin{bmatrix}6&2&4 \\\ -1&4&3 \\\ -2&9&3\end{bmatrix}
+\begin{bmatrix}4 \\\ -2 \\\ 1\end{bmatrix}.$$
+
+We can evaluate this with NumPy using:
+```py
+import numpy as np
+
+# Define the matrix
+matrix = np.array([[6, 2, 4],
+                   [-1, 4, 3],
+                   [-2, 9, 3]])
+
+# Define the vector
+vector = np.array([[4], [-2], [1]])
+
+# Perform the matrix-vector multiplication
+result = matrix @ vector  # Alternatively, use np.dot(matrix, vector)
+
+print(result)
+```
+This will output:  
+<span style="font-family:monospace">[[ 24]  
+&nbsp;[ -9]  
+&nbsp;[-23]]</span>
+```py
+z = np.array([[0], [0], [0], # acceleration
+              [0], [0], [0]]) # rotational velocity
+```
+{{< /tab >}}
+{{< /tabs >}}
+
+## State Variable
+
+{{< tabs items="Math,Python" >}}
+{{< tab >}}
+In order to determine when and how gait events happen, we would need to know the IMU's position and orientation in world frame axes, such as north($N$)-east($E$)-down($D$) axes. Additionally, it would be nice to have the IMU's velocity and acceleration in the world frame. To visualize this, we could assign variables to position, linear velocity, linear acceleration, orientation, and angular velocity, like this:
+$$
+\begin{align*}
+\mathbf p^{\text{world}}_k &= \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \end{bmatrix}, \\\\
+\mathbf v^{\text{world}}_k &= \begin{bmatrix} v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \end{bmatrix}, \\\\
+\mathbf a^{\text{world}}_k &= \begin{bmatrix} a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \end{bmatrix}, \\\\
+\mathbf q^{\text{world}}_k &= \begin{bmatrix} q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \end{bmatrix}, \\\\
+\boldsymbol\omega^{\text{world}}_k &= \begin{bmatrix} \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
+\end{align*}
+$$
+
+Here, $\mathbf q_k^\text{world}$ is a vector representation of the quaternion $\left[q^0_k + i\left(q^1_k\right) + j\left(q^2_k\right) + k\left(q^3_k\right)\right]$. I use quaternions rather than matricies to represent orientation because they let us update our orientation using the quaternion update function
+$$
+\mathbf q_{k+1} = \mathbf q_k+\frac12dt\cdot\mathbf q_k\otimes\left[0 + i\left(\omega^{\text{N}}_k\right) + j\left(\omega^{\text{E}}_k\right) + k\left(\omega^{\text{D}}_k\right)\right],
+$$
+providing a consistent method for interpolating angles between time steps *($\otimes$ represents the "[Hamilton product](https://en.wikipedia.org/wiki/Quaternion#:~:text=of%20vector%20quaternions.-,Hamilton%20product,-%5Bedit%5D)", AKA quaternion multiplication).*
+
+Putting these together, we can think of our system state (at least the parts we care about) as being represented by a variable $\mathbf x$, where at time $k$ we estimate that its properties are
+$$
+\mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
+$$
+{{< /tab >}}
+
+{{< tab >}}
+```py
+x = np.array([[0], [0], [0], # position
+              [0], [0], [0], # velocity
+              [0], [0], [0], # acceleration
+              [1], [0], [0], [0], # orientation quaternion
+              [0], [0], [0]]) # rotational velocity
+```
+{{< /tab >}}
+{{< /tabs >}}
+
+### Quaternion Info
+{{< details-html title="What are Quaternions?" closed="true" >}}
+{{< md >}}
+
+
+Quaternions are four-dimensional hypercomplex numbers which offer a powerful approach to orientation tracking because of their capacity for representing three-dimensional rotations. Specifically, a single unit quaternion can represent any 3d rotation without the common pitfalls of other rotation representations, such as gimbal lock. Moreover, quaternions allow for efficient and numerically stable calculations, especially beneficial in real-time tracking contexts like gait analysis. The quaternion-based approach simplifies the compounding of rotations by encapsulating complex rotational transformations in quaternion multiplication, reducing the risk of drift and improving accuracy in sensor fusion algorithms. This capability makes quaternions particularly well-suited for the recursive nature of state estimation models, where orientation data from consecutive IMU measurements need to be seamlessly integrated over time.
+
+Quaternions also support interpolation methods such as spherical linear interpolation (SLERP), which preserves the shortest path of rotation and minimizes error, critical in applications like gait analysis where precise orientation tracking is needed. This combination of stability, efficiency, and the ability to handle continuous rotations makes quaternions an optimal choice for robust and reliable orientation tracking in IMU-based gait analysis.
+
+Quaternions represent orientation through a four-dimensional structure that encodes three-dimensional rotation in a single unit quaternion, commonly denoted $q = w + xi + yj + zk$, where $w$, $x$, $y$, and $z$ are real numbers and $i$, $j$, and $k$, are imaginary units. The product $ijk$ is defined to equal $-1$, and multiplication between any two imaginaries follows the rules of the table below, where the left column shows the left factor and the top row shows the right factor (note that the products are *not* commutative):
+| $\boldsymbol\otimes$ | $\textbf{\textit i}$ | $\textbf{\textit j}$ | $\textbf{\textit k}$ |
+|----------------------|----------------------|----------------------|----------------------|
+| $\textbf{\textit i}$ |  $-1$   |   $k$   |  $-j$   |
+| $\textbf{\textit j}$ |  $-k$   |  $-1$   |   $i$   |
+| $\textbf{\textit k}$ |   $j$   |  $-i$   |  $-1$   |
+
+Multiplication between two quaternions $q_1 = w_1 + x_1i + y_1j + z_1k$ and $q_2 = w_2 + x_2i + y_2j + z_2k$, is defined according to the Hamilton product formula:
+$$\begin{align*}
+q=q_1 \otimes q_2=&\ \ \left(w_1w_2 - x_1x_2 - y_1y_2 - z_1z_2\right) \\\
+&+ \left(w_1x_2 + x_1w_2 + y_1z_2 - z_1y_2\right)i \\\
+&+ \left(w_1y_2 - x_1z_2 + y_1w_2 + z_1x_2\right)j \\\
+&+ \left(w_1z_2 + x_1y_2 - y_1x_2 + z_1w_2\right)k,
+\end{align*}$$
+which is also *not* commutative.
+
+Quaternion multiplication is useful in representing 3d rotations because it can easily compute a rotation by a given angle around some axis passing through the origin. Consider the rotation of a point $P$ by an angle of $\theta$ around an axis $A$ which passes through the origin. First, we normalize the vector $\overrightarrow A$ such that if it has components $x$, $y$, $z$, then $x^2+y^2+z^2=1$. Next, we construct a quaternion $q$ such that
+$$q = (\cos(\theta/2)+\sin(\theta/2)(xi+yj+zk)),$$
+and its inverse $q^{-1}$ such that
+$$q^{-1} = (\cos(\theta/2)-\sin(\theta/2)(xi+yj+zk)).$$
+Now, we make a quaternion for our point $P$ so that if our point $P$ had coordinates $a$, $b$, $c$, then our quaternion $p$ is defined by
+$$p = ai+bj+ck.$$
+Now, to find the projection $P^\prime$ after the rotation, we have
+$$P^\prime = q\otimes p\otimes q^{-1}.$$
+By convention, quaternions are used to represent orientation by representing the rotation necessary for an object to go from some predefined "neutral" to its current orientation. In other words, a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation from neutral of $\theta$ around the vector $\langle x,y,z \rangle$.
+
+This framework for how quaternions work is admittedly not intuitive. The videos below from 3Blue1Brown provide a more in depth explanation of the mechanics, with helpful visuals.
+
+Part 1:
+{{< /md >}}
+{{< youtube d4EgbgTm0Bg >}}
+{{< md >}}Part 2:{{< /md >}}
+{{< youtube zjMuIxRvygQ >}}
+{{< /details-html >}}
+
+## Translating Between Local and World Frames
+
+{{< tabs items="Math,Python" >}}
+{{< tab >}}
+Our goal is to use our local pitch-roll-yaw coordinate system measurements to estimate the system state in terms of the global coordinate system. A difficulty with calculating acceleration in this manner is that the direction of gravity will change as our local axes rotate, and our accelerometers will not be able to distinguish this change in gravity from a change in linear acceleration. In this section, we use our quaternion orientation to address the issue.
+
+At a given time $k$, we will have the IMU's orientation stored as a quaterion $\mathbf q_k$ which represents the rotation from a "neutral" orientation to IMU's current orientation. In order to calculate the "down" direction from this, it is most efficient to convert this quaternion to a matrix. The rotation matrix $\mathbf C_k$, defined as
+$$
+\mathbf C_k = \begin{bmatrix}
+1 - 2\big((q^2_k)^2 + (q^3_k)^2\big) & 2\big(q^1_k q^2_k - q^0_k q^3_k\big) & 2\big(q^1_k q^3_k + q^0_k q^2_k\big) \\\\
+2\big(q^1_k q^2_k + q^0_k q^3_k\big) & 1 - 2\big((q^1_k)^2 + (q^3_k)^2\big) & 2\big(q^2_k q^3_k - q^0_k q^1_k\big) \\\\
+2\big(q^1_k q^3_k - q^0_k q^2_k\big) & 2\big(q^2_k q^3_k + q^0_k q^1_k\big) & 1 - 2\big((q^1_k)^2 + (q^2_k)^2\big)
+\end{bmatrix},
+$$
+rotates a vector from the local frame to the world frame. In other words, we have
+$$
+\begin{align*}
+\mathbf a^{\text{world}}_k = \mathbf C_k \cdot \mathbf a^{\text{local}}_k, \\\\
+\boldsymbol\omega^{\text{world}}_k = \mathbf C_k \cdot \boldsymbol\omega^{\text{local}}_k.
+\end{align*}
+$$
+Furthermore, since $\mathbf C_k$ is an orthogonal matrix, its inverse must be equal to its transpose $\mathbf C^T_k$, and thus
+$$
+\begin{align*}
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \cdot \mathbf a^{\text{world}}_k, \\\\
+\boldsymbol\omega^{\text{local}}_k = \mathbf C^T_k \cdot \boldsymbol\omega^{\text{world}}_k.
+\end{align*}
+$$
+Because of this, we can calculate world frame acceleration from our local measurements in a way that accounts for gravity. If we are measuring acceleration in m/s^2 units then we will always have
+$$\mathbf a^{\text{world}}_k = \begin{bmatrix} a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \end{bmatrix} = \begin{bmatrix} 0 \\\ 0 \\\ 9.81 \end{bmatrix}.$$
+
+Therefore, a stationary sensor with any given pitch-roll-yaw axes should read
+$$
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix} 0 \\\ 0 \\\ 9.81 \end{bmatrix}.
+$$
+By extension, any deviation from this value means that the sensor is accelerating in the world frame, so at any time $k$ our sensor should read
+$$
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \left(\mathbf a^{\text{world}}_k + \begin{bmatrix}0 \\ 0 \\ 9.8\end{bmatrix}\right).
+$$
+This looks like exactly what we need! To make things more concise, we will add $\mathbf a^{\text{world}}$ and gravity together into one vector, and write
+$$
+\mathbf a^{\text{local}}_k = \mathbf C^T_k \begin{bmatrix}a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k + 9.8\end{bmatrix}.
+$$
+
+Now that we've defined our problem and seen a bit of how our measurment and state variables relate to each other, it's time to build a sensor fusion algorith to estimate state from measurements.
+{{< /tab >}}
+
+{{< tab >}}
+```py
+def c_matrix(quaternion: np.ndarray) -> np.ndarray:
+    if len(quaternion) != 4:
+        raise ValueError(f"Expected quaternion of length 4, got {len(quaternion)} instead")
+
+    quaternion = quaternion.reshape(-1, 1)
+    q0 = quaternion[0, 0]
+    q1 = quaternion[1, 0]
+    q2 = quaternion[2, 0]
+    q3 = quaternion[3, 0]
+
+    c = np.array([[1-2*(q2**2+q3**2), 2*(q1*q2-q0*q3), 2*(q1*q3+q0*q2)],
+                  [2*(q1*q2+q0*q3), 1-2*(q1**2+q3**2), 2*(q2*q3-q0*q1)],
+                  [2*(q1*q3-q0*q2), 2*(q2*q3+q0*q1), 1-2*(q1**2+q2**2)]])
+
+    return c
+```
+
+As a basic check, we can verify the identity quaternion <span style="font-family:monospace">x[9:13]</span> produces the identify matrix:
+```py
+quat = x[9:13]
+print(c_matrix(quat))
+```
+This should return:  
+<span style="font-family:monospace">[[1 0 0]  
+&nbsp;[0 1 0]  
+&nbsp;[0 0 1]]</span>
+
+More generally, our <a href="/overview/#quaternions" target="_blank">quaternion equation from earlier</a> tells us that a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
+{{< /tab >}}
+{{< /tabs >}}
+
 ## State
 
 The state of the kalman filter is described by state variable $\mathbf x$ and the covariance $\mathbf P$. In this section, we will discuss how to set their initial values. After we set their initial values, our kalman filter will update them internally at each time step.
@@ -299,6 +393,8 @@ The process of the kalman filter is described by $\mathbf F$ (the state transiti
 
 ### F
 
+{{< tabs items="Math,Python" >}}
+{{< tab >}}
 Since we do not have any predetermined control inputs here, we want a 16x16 matrix $\mathbf F$ which we can multiply by the current state to get our predicted state in the next time step. To visualize this, we want a matrix which satisfies
 $$
 \begin{bmatrix}?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
@@ -540,6 +636,27 @@ $$
 *Notes:*  
 $\bullet$ *We were able to write lines 10-13 of this matrix using our  observation that each component of $\mathbf q_{k+1}$ was of the form $[a(q^0_k)+b(q^1_k)+c(q^2_k)+d(q^3_k)]$, but we could have also found the form of the $n^\text{th}$ component to be $[q^n + a(\omega^N_k)+b(\omega^E_k)+c(\omega^D_k)]$. This second form will let us write a second, equavalent matrix. As an intellecual exercise, you may double check this math by building this filter with the second matrix and verifying it produces the same results.*  
 $\bullet$ *This state transition matrix assumes the acceleration and angular velocity at time $t_{k+1}$ will approximately equal those at time $t_k$, which is a limitation of this filter during jerky events such as heel strike.*
+{{< /tab >}}
+{{< tab >}}
+```py
+dt = .01 # Adjust to data rate as needed
+
+wN = x[13]
+
+F_upper_left = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
+                         [0, 1, 0, 0, dt, 0, 0, 0, 0],
+                         [0, 0, 1, 0, 0, dt, 0, 0, 0],
+                         [0, 0, 0, 1, 0, 0, dt, 0, 0],
+                         [0, 0, 0, 0, 1, 0, 0, dt, 0],
+                         [0, 0, 0, 0, 0, 1, 0, 0, dt],
+                         [0, 0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 1]])
+
+
+```
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Q
 

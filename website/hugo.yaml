@@ -18,15 +18,18 @@ markup:
 
 menu:
   main:
+    - name: Content
+      url: "/overview/"
+      weight: 1
     - name: Contact ↗
       url: "https://adrienbabet.com/contact/"
-      weight: 1
-    - name: Search
       weight: 2
+    - name: Search
+      weight: 3
       params:
         type: search
     - name: GitHub
-      weight: 3
+      weight: 4
       url: "https://github.com/babetCode/BioMechRepo"
       params:
         icon: github
