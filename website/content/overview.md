@@ -119,31 +119,10 @@ $\mathbf B$ and $\mathbf u$ are new to us. They let us model control inputs to t
 >-  Form an estimate part way between the measurement and the prior
 >Your job as a designer will be to design the state $\left(\mathbf x, \mathbf P\right)$, the process $\left(\mathbf F, \mathbf Q\right)$, the measurement $\left(\mathbf z, \mathbf R\right)$, and the measurement function $\mathbf H$. If the system has control inputs, such as a robot, you will also design $\mathbf B$ and $\mathbf u$."
 
-Lets try applying this to our problem.
+Lets try applying this to our problem. For each of the following sections, I will describe the math and the python code I used to implement the filter.
 
-## Measurement Variable
-
-{{< tabs items="Math,Python" >}}
-{{< tab >}}
-When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
-$$
-\mathbf a^{\text{local}}_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \end{bmatrix}.
-$$
-
-It will also give us rotational velocity along these local axes which we can write as
-$$
-\boldsymbol\omega^{local}_k = \begin{bmatrix} \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
-$$
-
-Putting these together, we can think of our measurements as being represented by a variable $\mathbf z$, where at time $k$ the IMU gives us the reading
-$$
-\mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
-$$
-
-It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
-{{< /tab >}}
-
-{{< tab >}}
+### Python Info
+{{< details title="Getting started with NumPy" closed="true">}}
 Python is ideal for building a Kalman filter due to its simplicity, readability, and robust libraries for linear algebra and data analysis.
 
 **Numpy Arrays**  
@@ -175,6 +154,31 @@ This will output:
 <span style="font-family:monospace">[[ 24]  
 &nbsp;[ -9]  
 &nbsp;[-23]]</span>
+{{< /details >}}
+
+## Measurement Variable
+
+{{< tabs items="Math,Python" >}}
+{{< tab >}}
+When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
+$$
+\mathbf a^{\text{local}}_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \end{bmatrix}.
+$$
+
+It will also give us rotational velocity along these local axes which we can write as
+$$
+\boldsymbol\omega^{local}_k = \begin{bmatrix} \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
+$$
+
+Putting these together, we can think of our measurements as being represented by a variable $\mathbf z$, where at time $k$ the IMU gives us the reading
+$$
+\mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
+$$
+
+It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
+{{< /tab >}}
+
+{{< tab >}}
 ```py
 z = np.array([[0], [0], [0], # acceleration
               [0], [0], [0]]) # rotational velocity
@@ -642,6 +646,8 @@ $\bullet$ *This state transition matrix assumes the acceleration and angular vel
 dt = .01 # Adjust to data rate as needed
 
 wN = x[13]
+wE = x[14]
+wD = x[15]
 
 F_upper_left = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
                          [0, 1, 0, 0, dt, 0, 0, 0, 0],
@@ -653,7 +659,10 @@ F_upper_left = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0, 1, 0],
                          [0, 0, 0, 0, 0, 0, 0, 0, 1]])
 
-
+F_lower_right = np.array([[1, -dt*wN/2, -dt*wE/2, -dt*wD/2],
+                          [dt*wN/2, 1, dt*wD/2, -dt*wE/2],
+                          [dt*wE/2, -dt*wD/2, 1, dt*wN/2],
+                          [dt*wD/2, dt*wE/2, -dt*wN/2, 1]])
 ```
 {{< /tab >}}
 {{< /tabs >}}
