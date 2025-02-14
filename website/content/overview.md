@@ -119,16 +119,16 @@ $\mathbf B$ and $\mathbf u$ are new to us. They let us model control inputs to t
 >-  Form an estimate part way between the measurement and the prior
 >Your job as a designer will be to design the state $\left(\mathbf x, \mathbf P\right)$, the process $\left(\mathbf F, \mathbf Q\right)$, the measurement $\left(\mathbf z, \mathbf R\right)$, and the measurement function $\mathbf H$. If the system has control inputs, such as a robot, you will also design $\mathbf B$ and $\mathbf u$."
 
-Lets try applying this to our problem. For each of the following sections, I will describe the math and the python code I used to implement the filter.
+Lets try applying this to our problem. In the following sections, I describe the math and the python code I used to implement the filter.
 
 ### Python Info
-{{< details title="Getting started with NumPy" closed="true">}}
+{{< details title="Getting started With Numpy" closed="true">}}
 Python is ideal for building a Kalman filter due to its simplicity, readability, and robust libraries for linear algebra and data analysis.
 
-**Numpy Arrays**  
+**Numpy Arrays**<hr>
 NumPy arrays are n-dimensional data structures that enable efficient computations and are particularly well-suited for handling the matrix manipulations required in Kalman filtering.
 
-**Matrix Multiplication with Numpy**  
+**Matrix Multiplication with Numpy**<hr>
 Consider the expression
 $$\begin{bmatrix}6&2&4 \\\ -1&4&3 \\\ -2&9&3\end{bmatrix}
 \begin{bmatrix}4 \\\ -2 \\\ 1\end{bmatrix}.$$
@@ -154,12 +154,28 @@ This will output:
 <span style="font-family:monospace">[[ 24]  
 &nbsp;[ -9]  
 &nbsp;[-23]]</span>
+
+
+**Kalman Equations with NumPy**<hr>
+```py
+# Predict State and Error Covariance
+xp = A @ x
+Pp = A @ P @ A.T + Q
+
+# Compute Kalman Gain
+K = Pp @ H.T @ numpy.linalg.inv(H @ Pp @ H.T + R)
+
+# State Update
+x = xp + K @ (z - H @ xp)
+
+# Compute Error Covariance
+P = Pp - (K @ H @ Pp)
+```
+
 {{< /details >}}
 
 ## Measurement Variable
 
-{{< tabs items="Math,Python" >}}
-{{< tab >}}
 When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
 $$
 \mathbf a^{\text{local}}_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \end{bmatrix}.
@@ -176,20 +192,9 @@ $$
 $$
 
 It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
-{{< /tab >}}
-
-{{< tab >}}
-```py
-z = np.array([[0], [0], [0], # acceleration
-              [0], [0], [0]]) # rotational velocity
-```
-{{< /tab >}}
-{{< /tabs >}}
 
 ## State Variable
 
-{{< tabs items="Math,Python" >}}
-{{< tab >}}
 In order to determine when and how gait events happen, we would need to know the IMU's position and orientation in world frame axes, such as north($N$)-east($E$)-down($D$) axes. Additionally, it would be nice to have the IMU's velocity and acceleration in the world frame. To visualize this, we could assign variables to position, linear velocity, linear acceleration, orientation, and angular velocity, like this:
 $$
 \begin{align*}
@@ -211,18 +216,6 @@ Putting these together, we can think of our system state (at least the parts we 
 $$
 \mathbf x_k = \begin{bmatrix} p^{\text{N}}_k \\\ p^{\text{E}}_k \\\ p^{\text{D}}_k \\\ v^{\text{N}}_k \\\ v^{\text{E}}_k \\\ v^{\text{D}}_k \\\ a^{\text{N}}_k \\\ a^{\text{E}}_k \\\ a^{\text{D}}_k \\\ q^0_k \\\ q^1_k \\\ q^2_k \\\ q^3_k \\\ \omega^{\text{N}}_k \\\ \omega^{\text{E}}_k \\\ \omega^{\text{D}}_k \end{bmatrix}.
 $$
-{{< /tab >}}
-
-{{< tab >}}
-```py
-x = np.array([[0], [0], [0], # position
-              [0], [0], [0], # velocity
-              [0], [0], [0], # acceleration
-              [1], [0], [0], [0], # orientation quaternion
-              [0], [0], [0]]) # rotational velocity
-```
-{{< /tab >}}
-{{< /tabs >}}
 
 ### Quaternion Info
 {{< details-html title="What are Quaternions?" closed="true" >}}
@@ -270,8 +263,6 @@ Part 1:
 
 ## Translating Between Local and World Frames
 
-{{< tabs items="Math,Python" >}}
-{{< tab >}}
 Our goal is to use our local pitch-roll-yaw coordinate system measurements to estimate the system state in terms of the global coordinate system. A difficulty with calculating acceleration in this manner is that the direction of gravity will change as our local axes rotate, and our accelerometers will not be able to distinguish this change in gravity from a change in linear acceleration. In this section, we use our quaternion orientation to address the issue.
 
 At a given time $k$, we will have the IMU's orientation stored as a quaterion $\mathbf q_k$ which represents the rotation from a "neutral" orientation to IMU's current orientation. In order to calculate the "down" direction from this, it is most efficient to convert this quaternion to a matrix. The rotation matrix $\mathbf C_k$, defined as
@@ -313,9 +304,8 @@ $$
 $$
 
 Now that we've defined our problem and seen a bit of how our measurment and state variables relate to each other, it's time to build a sensor fusion algorith to estimate state from measurements.
-{{< /tab >}}
 
-{{< tab >}}
+{{< details title="Rotation Matrix from Quaternion With Numpy" closed="true" >}}
 ```py
 def c_matrix(quaternion: np.ndarray) -> np.ndarray:
     if len(quaternion) != 4:
@@ -344,9 +334,8 @@ This should return:
 &nbsp;[0 1 0]  
 &nbsp;[0 0 1]]</span>
 
-More generally, our <a href="/overview/#quaternions" target="_blank">quaternion equation from earlier</a> tells us that a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
-{{< /tab >}}
-{{< /tabs >}}
+More generally, our <a href="/overview/#:~:text=orientation%20using%20the-,quaternion%20update%20function,-%F0%9D%91%9E">quaternion equation from earlier</a> tells us that a quaternion of the form $\left[\cos(\theta/2) + \sin(\theta/2)\left(xi + yj + zk\right)\right]$ represents a rotation of $\theta$ around the vector $\langle x,y,z \rangle$.
+{{< /details >}}
 
 ## State
 
@@ -365,6 +354,16 @@ $$
 $$
 \implies\mathbf x_0 = \begin{bmatrix}0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 1 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0 \\\ 0\end{bmatrix}.
 $$
+
+{{< details title="Initial x With NumPy" closed="true" >}}
+```py
+x = np.array([[0], [0], [0], # position
+              [0], [0], [0], # velocity
+              [0], [0], [0], # acceleration
+              [1], [0], [0], [0], # orientation quaternion
+              [0], [0], [0]]) # rotational velocity
+```
+{{< /details >}}
 
 ### P
 
@@ -397,8 +396,6 @@ The process of the kalman filter is described by $\mathbf F$ (the state transiti
 
 ### F
 
-{{< tabs items="Math,Python" >}}
-{{< tab >}}
 Since we do not have any predetermined control inputs here, we want a 16x16 matrix $\mathbf F$ which we can multiply by the current state to get our predicted state in the next time step. To visualize this, we want a matrix which satisfies
 $$
 \begin{bmatrix}?&?&?&?&?&?&?&?&?&?&?&?&?&?&?&?\\\
@@ -640,8 +637,9 @@ $$
 *Notes:*  
 $\bullet$ *We were able to write lines 10-13 of this matrix using our  observation that each component of $\mathbf q_{k+1}$ was of the form $[a(q^0_k)+b(q^1_k)+c(q^2_k)+d(q^3_k)]$, but we could have also found the form of the $n^\text{th}$ component to be $[q^n + a(\omega^N_k)+b(\omega^E_k)+c(\omega^D_k)]$. This second form will let us write a second, equavalent matrix. As an intellecual exercise, you may double check this math by building this filter with the second matrix and verifying it produces the same results.*  
 $\bullet$ *This state transition matrix assumes the acceleration and angular velocity at time $t_{k+1}$ will approximately equal those at time $t_k$, which is a limitation of this filter during jerky events such as heel strike.*
-{{< /tab >}}
-{{< tab >}}
+
+<br>
+{{< details title="F Matrix With NumPy" closed="true" >}}
 ```py
 dt = .01 # Adjust to data rate as needed
 
@@ -654,18 +652,18 @@ F_upper_left = np.array([[1, 0, 0, dt, 0, 0, 0, 0, 0],
                          [0, 0, 1, 0, 0, dt, 0, 0, 0],
                          [0, 0, 0, 1, 0, 0, dt, 0, 0],
                          [0, 0, 0, 0, 1, 0, 0, dt, 0],
-                         [0, 0, 0, 0, 0, 1, 0, 0, dt],
-                         [0, 0, 0, 0, 0, 0, 1, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0, 1]])
+                         [0, 0, 0, 0, 0, 1, 0, 0, dt]])
 
 F_lower_right = np.array([[1, -dt*wN/2, -dt*wE/2, -dt*wD/2],
                           [dt*wN/2, 1, dt*wD/2, -dt*wE/2],
                           [dt*wE/2, -dt*wD/2, 1, dt*wN/2],
                           [dt*wD/2, dt*wE/2, -dt*wN/2, 1]])
+
+F = np.eye(16)
+F[:6,:9] = F_upper_left
+F[9:13,9:13] = F_lower_right
 ```
-{{< /tab >}}
-{{< /tabs >}}
+{{< /details >}}
 
 ### Q
 
@@ -703,6 +701,13 @@ As described in the *"Measurement Variable"* section, we will have
 $$
 \mathbf z_k = \begin{bmatrix} a^{\text{pitch}}_k \\\ a^{\text{roll}}_k \\\ a^{\text{yaw}}_k \\\ \omega^{\text{pitch}}_k \\\ \omega^{\text{roll}}_k \\\ \omega^{\text{yaw}}_k \end{bmatrix}.
 $$
+
+{{< details title="Initial z With NumPy" closed="true" >}}
+```py
+z = np.array([[0.], [0.], [0.], # acceleration
+              [0.], [0.], [0.]]) # rotational velocity
+```
+{{< /details >}}
 
 ### R
 
