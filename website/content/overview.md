@@ -8,7 +8,7 @@ breadcrumbs: false
 weight: 1
 ---
 
-The Kalman Filter is a recursive algorithm used to estimate the state of dynamic systems from noisy measurements. One of its application is tracking the orientation of an Inertial Measurement Unit (IMU). IMUs provide data on acceleration and angular velocity but are prone to noise and drift over time. The Kalman Filter helps fuse this noisy sensor data with a predictive model to more accurately estimate the IMU's orientation given the measurement errors. In general, the Kalman Filter's ability to combine system predictions with real-time observations to produce optimal state estimates makes it useful in dynamic systems where the state changes over time. It is also computationally efficient due to its recursive nature, making it suitable for real-time applications. Here, I describe an extended kalman filter (one of many types of kalman filters) for a 6-axis IMU.
+The Kalman Filter is a recursive algorithm used to estimate the state of dynamic systems from noisy measurements. One of its application is tracking the orientation of an Inertial Measurement Unit (IMU). IMUs provide data on acceleration and angular velocity but are prone to noise and drift over time. The Kalman Filter helps fuse this noisy sensor data with a predictive model to more accurately estimate the IMU's orientation given the measurement errors. In general, the Kalman Filter's ability to combine system predictions with real-time observations to produce optimal state estimates makes it useful in dynamic systems where the state changes over time. It is also computationally efficient due to its recursive nature, making it suitable for real-time applications. Here, I describe an EKF (extended kalman filter --- one of many types of kalman filters) for a 6-axis IMU.
 
 ## Kalman Equations
 
@@ -123,10 +123,10 @@ Lets try applying this to our problem. In the following sections, I describe the
 
 ### Python Info
 {{< details title="Getting started With Numpy" closed="true">}}
-Python is ideal for building a Kalman filter due to its simplicity, readability, and robust libraries for linear algebra and data analysis.
+Python is an ideal language for building a Kalman filter due to its simplicity, readability, and robust libraries for linear algebra and data analysis.
 
 **Numpy Arrays**<hr>
-NumPy arrays are n-dimensional data structures that enable efficient computations and are particularly well-suited for handling the matrix manipulations required in Kalman filtering.
+NumPy (short for "numerical python") is a widely used python library for scientific computing, especially when performing linear algebra calculations. NumPy arrays are n-dimensional data structures that are well-suited for the matrix manipulations in Kalman filtering.
 
 **Matrix Multiplication with Numpy**<hr>
 Consider the expression
@@ -174,7 +174,7 @@ P = Pp - (K @ H @ Pp)
 
 {{< /details >}}
 
-## Measurement Variable
+## Defining the Measurement Variable
 
 When using an IMU for gait analysis, we would like to use the IMU's measurements to calculate heel-strike, toe-off, and stride length (and perhaps we'll add toe-down and heel-off if we're feeling ambitious). At any given time $k$, the IMU will give us accelerometer data along its three local axes. We can think of this accereration data as a vector $\mathbf a^\text{local}$, where at time $k$, we have
 $$
@@ -193,7 +193,7 @@ $$
 
 It's important to keep in mind that these measurements are with respect to the local frame of the IMU, and not the world frame.
 
-## State Variable
+## Defining the State Variable
 
 In order to determine when and how gait events happen, we would need to know the IMU's position and orientation in world frame axes, such as north($N$)-east($E$)-down($D$) axes. Additionally, it would be nice to have the IMU's velocity and acceleration in the world frame. To visualize this, we could assign variables to position, linear velocity, linear acceleration, orientation, and angular velocity, like this:
 $$
@@ -363,6 +363,7 @@ x = np.array([[0], [0], [0], # position
               [1], [0], [0], [0], # orientation quaternion
               [0], [0], [0]]) # rotational velocity
 ```
+This represents an initial state variable where the IMU is stationary and the local pitch-roll-yaw axes align with the world north-east-down axes.
 {{< /details >}}
 
 ### P
