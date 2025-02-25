@@ -826,3 +826,46 @@ $$
 0&0&0&0&0&0&0&0&0&0&0&0&0&c^2_k&c^5_k&c^8_k
 \end{bmatrix}.
 $$
+
+## Putting it All together
+
+Using the FilterPy library, we can put this all together with
+
+```py
+from filterpy.kalman import ExtendedKalmanFilter as EKF
+
+# Parameters
+dt = .001
+Q = np.eye(16)
+R = np.diag([.5] * 3 + [.9] * 3)
+x_0 = np.zeros((16, 1))
+x_0[9, 0] = 1.
+P_0 = np.eye(16)
+
+def get_F(x, dt):
+    wN, wE, wD = [float(x[i, 0]) for i in range(13, 16)]
+    F = np.eye(16)
+    for i in range(6):
+        A[i, i+3] = dt
+    bottom = np.array([[1, -dt*wN/2, -dt*wE/2, -dt*wD/2],
+                       [dt*wN/2, 1, dt*wD/2, -dt*wE/2],
+                       [dt*wE/2, -dt*wD/2, 1, dt*wN/2],
+                       [dt*wD/2, dt*wE/2, -dt*wN/2, 1]],
+                       dtype=float)
+    F[9:13, 9:13] = bottom
+    return F
+
+def quat2matrix(q):
+    q0, q1, q2, q3 = [float(q[i, 0]) for i in range(4)]
+    C = np.array([[1 - 2*(q2**2 + q3**2), 2*(q1*q2 - q0*q3), 2*(q1*q3 + q0*q2)],
+                  [2*(q1*q2 + q0*q3), 1 - 2*(q1**2 + q3**2), 2*(q2*q3 - q0*q1)],
+                  [2*(q1*q3 - q0*q2), 2*(q2*q3 + q0*q1), 1 - 2*(q1**2 + q2**2)]])
+    return C
+
+def get_H(x):
+    C = quat2matrix(x[9:13])
+    H = np.zeros((6, 16))
+    H[0:3, 6:9] = C.T
+    H[3:6, 13:16] = C.T
+    return H
+```
