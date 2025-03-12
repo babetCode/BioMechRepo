@@ -868,4 +868,43 @@ def get_H(x):
     H[0:3, 6:9] = C.T
     H[3:6, 13:16] = C.T
     return H
+
+def quat_norm(q):
+    norm = np.linalg.norm(q)
+    if norm == 0:
+        raise ValueError('Cannot normalize a zero vector')
+    return q / norm
+
+# Initialize the EKF
+ekf = EKF(dim_x=16, dim_z=6)
+ekf.Q = Q
+ekf.R = R
+ekf.x = x_0
+ekf.P = P_0
+ekf.B = B
+
+columns = ['pN', 'pE', 'pD', 'vN', 'vE', 'vD', 'aN', 'aE', 'aD', 'q0', 'q1', 'q2', 'q3', 'wN', 'wE', 'wD']
+predictions = pd.DataFrame(columns=columns)
+estimates = pd.DataFrame(columns=columns)
+res_columns = ['a_pitch', 'a_roll', 'a_yaw', 'w_pitch', 'w_roll', 'w_yaw']
+residuals = pd.DataFrame(columns=res_columns)
+
+# Get measurements in pandas dataframe
+
+for k, measurement in measurements.iterrows():
+
+    # format the measurement
+    measurement = measurement.to_numpy().reshape(-1,1)
+
+    # Prediction step
+    ekf.F = get_A(ekf.x, dt)
+    ekf.predict()
+    ekf.x[9:13] = quat_norm(ekf.x[9:13])
+    predictions.loc[len(predictions)] = ekf.x.flatten()
+
+    ekf.F = get_A(ekf.x, dt)
+    ekf.update(measurement, HJacobian=get_H, Hx=H_function)
+    ekf.x[9:13] = quat_norm(ekf.x[9:13])
+    estimates.loc[len(estimates)] = ekf.x.flatten()
+    residuals.loc[len(residuals)] = ekf.y.flatten()
 ```
